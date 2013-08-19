@@ -89,7 +89,7 @@ class CheckMKLiveStatus extends AbstractAPI
 		$read = @socket_read($this->live, 2048);
 		
 		$buf = '';
-		if (false !== ($bytes = socket_recv($socket, $this->live, 2048, MSG_WAITALL))) 
+		if (false !== ($bytes = socket_recv($this->live, $buf, 2048, MSG_WAITALL))) 
 		{
 			echo "Read $bytes bytes from socket_recv(). Closing socket...";
 		} else 
