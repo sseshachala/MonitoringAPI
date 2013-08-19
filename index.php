@@ -13,7 +13,7 @@ $result = $liveStatus ->connectSocket();
 
 print_r($result);
 
-$query = "GET hosts\nColumns: host_address\n";
+$query = "GET hosts\n";
 if($result)
 {
 	$data = $liveStatus -> queryLivestatus($query);
