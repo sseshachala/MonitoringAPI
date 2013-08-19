@@ -1,7 +1,7 @@
 <?php
 require_once 'AbstractAPI.php';
 require_once 'LiveException.php';
-class CheckMKLiveStatus implements AbstractAPI
+class CheckMKLiveStatus extends AbstractAPI
 {
 	protected $conf = Array(
 			// The socket type can be 'unix' for connecting with the unix socket
