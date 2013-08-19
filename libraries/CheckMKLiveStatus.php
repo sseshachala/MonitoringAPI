@@ -30,6 +30,8 @@ class CheckMKLiveStatus implements AbstractAPI
 			case 'unix' : $result = socket_connect($this->live, $this->conf['socketPath']); break;
 			case 'tcp' :  $result = socket_connect($this->live, $this->conf['socketAddress'], $this->conf['socketPort']); break;
 		}
+		
+		print_r($result)
 		return $result;
 	}
 	
@@ -74,6 +76,7 @@ class CheckMKLiveStatus implements AbstractAPI
 				socket_set_option($this->live, SOL_TCP, 1, 1);
 			}
 		}
+		return $result;
 	}
 	
 	public function queryLivestatus($query) 
