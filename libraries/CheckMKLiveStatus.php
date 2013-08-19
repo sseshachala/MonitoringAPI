@@ -95,7 +95,9 @@ class CheckMKLiveStatus extends AbstractAPI
 			throw new LiveException("error.livestatus_socket_error", socket_strerror(socket_last_error($this->live)));
 		}
 		
+		print_r($buf);
 		
+		$obj = stdClass();
 			// Decode the json response
 		$obj = json_decode(utf8_encode($buf) );
 		$obj -> totalBytes = $bytes;
