@@ -31,20 +31,18 @@ class CheckMKLiveStatus implements AbstractAPI
 			case 'tcp' :  $result = socket_connect($this->live, $this->conf['socketAddress'], $this->conf['socketPort']); break;
 		}
 		
-		print_r($result)
+		print_r($result);
 		return $result;
 	}
 	
 	private function initSocket()
 	{
-		$result = false;
-	
 		switch($this->conf['socketType'])
 		{
 			case 'unix' : $this->live = socket_create(AF_UNIX, SOCK_STREAM, 0); break;
 			case 'tcp' :  $this->live = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);break;
 		}
-		return $result;
+
 	}
 	
 	public function connectSocket() {
