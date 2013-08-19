@@ -12,3 +12,11 @@ $liveStatus = new CheckMKLiveStatus();
 $result = $liveStatus ->connectSocket();
 
 print_r($result);
+
+$query = "GET hosts\nColumns: host_address\n";
+if($result)
+{
+	$data = $liveStatus -> queryLivestatus($query);
+	print_r($data);
+}
+

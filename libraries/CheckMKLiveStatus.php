@@ -31,7 +31,6 @@ class CheckMKLiveStatus extends AbstractAPI
 			case 'tcp' :  $result = socket_connect($this->live, $this->conf['socketAddress'], $this->conf['socketPort']); break;
 		}
 		
-		print_r($result);
 		return $result;
 	}
 	
