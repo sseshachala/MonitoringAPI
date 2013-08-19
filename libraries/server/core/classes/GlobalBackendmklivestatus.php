@@ -72,7 +72,7 @@ class GlobalBackendmklivestatus implements GlobalBackendInterface {
         $this->backendId = $backendId;
 
         // Parse the socket params
-        $this->parseSocket(cfg('backend_'.$backendId, 'socket'));
+        $this->parseSocket($this->cfg('backend_'.$backendId, 'socket'));
 
         // Run preflight checks
         if($this->socketType == 'unix' && !$this->checkSocketExists()) {
@@ -86,6 +86,15 @@ class GlobalBackendmklivestatus implements GlobalBackendInterface {
         }
 
         return true;
+    }
+	
+	private function cfg($sec, $opt) {
+        if($opt == 'base_url')
+            return 'http://127.0.0.1/nagiosbp/cgi-bin/nagios-bp.cgi';
+        if($opt == 'auth_user')
+            return 'omdadmin';
+        if($opt == 'auth_pass')
+            return 'omd';
     }
 
     /**

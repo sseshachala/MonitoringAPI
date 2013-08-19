@@ -8,8 +8,9 @@ if(empty($_GET['request']))
 
 $request = $_GET['request'];
 error_reporting(-1);
+require_once 'libraries/server/core/classes/GlobalBackendInterface.php';
 require_once 'libraries/server/core/classes/GlobalBackendmklivestatus.php';
-require_once 'libraries/server/core/classes/GlobalBackendmklivestatus.php';
+
 
 $data = '';
 switch($request)
