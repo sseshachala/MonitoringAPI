@@ -97,7 +97,8 @@ class CheckMKLiveStatus extends AbstractAPI
 		
 		
 			// Decode the json response
-		$obj = json_decode(array('total_bytes' => $bytes, 'data' => utf8_encode($buf) ));
+		$obj = json_decode(utf8_encode($buf) );
+		$obj -> totalBytes = $bytes;
 		socket_close($this->live);
 		$this->live = NULL;
 		return $obj;
