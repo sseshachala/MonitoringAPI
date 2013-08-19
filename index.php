@@ -8,8 +8,15 @@ if(empty($_GET['request']))
 
 $request = $_GET['request'];
 
+require_once 'server/core/classes/GlobalBackendmklivestatus.php';
+require_once 'server/core/classes/GlobalBackendmklivestatus.php';
+
+$data = '';
 switch($request)
 {
-	case 'hosts' : echo 'Hosts'; exit(); // Initial a Class hexx
+	
+	case 'hosts' : $backend = new GlobalBackendmklivestatus('', 'mysite'); 
+					print_r($backend);
+				exit(); // Initial a Class hexx
 
 }
