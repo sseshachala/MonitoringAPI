@@ -85,8 +85,6 @@ class CheckMKLiveStatus extends AbstractAPI
 		
 		echo 'Writing to socket..';
 		@socket_write($this->live, $query."\nOutputFormat: json\n\n");
-		// Read 16 bytes to get the status code and body size
-		$read = @socket_read($this->live, 2048);
 		
 		$buf = '';
 		if (false !== ($bytes = socket_recv($this->live, $buf, 2048, MSG_WAITALL))) 
@@ -99,7 +97,7 @@ class CheckMKLiveStatus extends AbstractAPI
 		
 		
 			// Decode the json response
-		$obj = json_decode(utf8_encode(array('total_bytes' => $bytes, 'data' => $bug)));
+		$obj = json_decode(utf8_encode(array('total_bytes' => $bytes, 'data' => $buf)));
 		socket_close($this->live);
 		$this->live = NULL;
 		return $obj;
