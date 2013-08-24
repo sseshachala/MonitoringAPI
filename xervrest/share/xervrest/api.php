@@ -102,7 +102,7 @@
             'statehist' => Array('verb' => 'GET', 'params' => false),
 
             'ack_host' => Array('verb' => 'COMMAND', 'params' => Array( 'host' => 0, 'message' => 1)),
-            'ack_service' => Array('verb' => 'COMMAND', 'params' => Array( 'ack_service' => 0, 'message' => 1)),
+            'ack_service' => Array('verb' => 'COMMAND', 'params' => Array( 'service' => 0, 'message' => 1)),
             'schedule_host_check' => Array('verb' => 'COMMAND', 'params' => Array( 'host' => 0, )),
             'schedule_host_services_check' => Array('verb' => 'COMMAND', 'params' => Array( 'host' => 0, )),
             'schedule_service_check' => Array('verb' => 'COMMAND', 'params' => Array( 'host' => 0, 'service' => 1)),

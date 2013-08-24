@@ -27,11 +27,16 @@ class LiveStatus
 		$this->socket = $this->_connect();
 	}
 
-	public function query($query)
+	public function query($query, $no_wait=false)
 	{
 		fwrite($this->socket, $query);
-		$response = explode("\n",stream_get_contents($this->socket));
 
+        if($no_wait)
+        {
+            return;
+        }
+
+		$response = explode("\n",stream_get_contents($this->socket));
 		$resp_header = $response[0]; 
 		$results = implode(' ', array_slice($response, 1));
 
