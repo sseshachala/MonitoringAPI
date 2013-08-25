@@ -120,7 +120,8 @@
                 switch ($this->implemented[$method]['verb'])
                 {
                     case 'GET':
-                        return $this->do_get($method, $arguments[0], $arguments[1]);
+                        array_unshift($arguments, $method);
+                        return call_user_func_array(array($this, 'do_get'), $arguments);
                         break;
                 }
             }
@@ -135,6 +136,9 @@
         public function handle_get_params($params)
         {
             $filters = Array();
+            $limit = 0;
+            $offset = 0;
+            $columns = Array();
 
             foreach($params as $param => $value)
             {
@@ -147,8 +151,16 @@
                 {
                     $columns = explode(',',$value);
                 }
+                elseif($param == "limit")
+                {
+                    $limit = $value;
+                }
+                elseif($param == "limit")
+                {
+                    $offset = $value;
+                }
             }
-            return(Array($columns,$filters));
+            return(Array($columns,$filters,$limit,$offset));
         }
 
         public function handle_command_params($method, $params)
@@ -168,7 +180,7 @@
         {
             if(!$params)
             {
-                return(Array());
+                return(Array(false,false,false,false));
             }
 
             if( $this->implemented[$method]['verb'] == 'GET' )
@@ -182,7 +194,7 @@
             }
         }
 
-        public function do_get($table, $columns=false, $filters=false)
+        public function do_get($table, $columns=false, $filters=false, $limit=false, $offset=false)
         {
             $query = new LQL('GET');
             $query->table($table);
