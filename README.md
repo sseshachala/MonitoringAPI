@@ -56,6 +56,11 @@ http://<server>/<site>/xervrest/hosts?columns=<col>,<col>,<col>
 
 http://<server>/<site>/xervrest/hosts?filter0=<filter>&filter1=<filter>
 
+Limit & Offset:
+---------------
+
+http://<server>/<site>/xervrest/hosts?limit=<n>&offset=<n>
+
 
 List of 'ACTION' methods
 ------------------------
