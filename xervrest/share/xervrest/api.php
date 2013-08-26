@@ -8,6 +8,7 @@
 
         private $output_format;
         private $response_header;
+        private $column_headers = True;
 
         function LQL($verb, $response_header = 'fixed16', $output_format = 'json')
         {
@@ -36,6 +37,11 @@
         function columns($columns)
         {
             array_push($this->query, "Columns: " . implode(' ', $columns));
+        }
+
+        function column_headers($toggle)
+        {
+            $this->column_headers = $toggle;
         }
 
         function filter($filter)
@@ -67,6 +73,11 @@
         {
             if($this->verb == 'GET')
             {
+                if($this->column_headers == True)
+                {
+                    array_push($this->query, "ColumnHeaders: on");
+                }
+
                 array_push($this->query, "ResponseHeader: " . $this->response_header);
                 array_push($this->query, "OutputFormat: " . $this->output_format);
                 return implode("\n", $this->query) . "\n\n";
@@ -155,7 +166,7 @@
                 {
                     $limit = $value;
                 }
-                elseif($param == "limit")
+                elseif($param == "offset")
                 {
                     $offset = $value;
                 }
@@ -194,6 +205,26 @@
             }
         }
 
+        public function paginate($results, $limit, $offset=0)
+        {
+            $results_a = json_decode($results);
+            $header = array_shift($results_a);
+
+            if($offset > count($results_a) -1)
+            {
+                throw Exception("Offset ($offset) is larger than row count.");
+            }
+
+            if($limit < 1)
+            {
+                $limit = NULL;
+            }
+
+            $results_a = array_slice($results_a, $offset, $limit);
+            array_unshift($results_a, $header);
+            return str_replace('\/','/', json_encode($results_a));
+        }
+
         public function do_get($table, $columns=false, $filters=false, $limit=false, $offset=false)
         {
             $query = new LQL('GET');
@@ -212,7 +243,14 @@
                 }
             }
 
-            return $this->livestatus_obj->query($query->as_string());
+            $results = $this->livestatus_obj->query($query->as_string());
+
+            if($limit > 0 || $offset > 0)
+            {
+                $results = $this->paginate($results, $limit, $offset);
+            }
+
+            return($results);
         }
 
         public function do_command($command)
