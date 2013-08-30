@@ -12,8 +12,7 @@
 
 		$app->contentType('application/json');
 
-		$tmp_a = preg_split("/\//", $_SERVER['REQUEST_URI']);
-		$site = $tmp_a[1];
+		$site = get_site();
 
 		$sock_file = "/omd/sites/$site/tmp/run/live";
 

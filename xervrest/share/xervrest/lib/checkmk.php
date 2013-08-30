@@ -1,5 +1,34 @@
 <?php
 
+class CheckMkCfg
+{
+    public $cfg_file;
+
+    public function CheckMkCfg($cfg_file)
+    {
+        $this->cfg_file = $cfg_file;
+    }
+
+    public function add_ps_check($host, $cname, $proc, $user=false, $warnmin=1, $okmin=1, $okmax=1, $warnmax=1)
+    {
+        $fh = fopen($this->cfg_file, 'w');
+        $user = ($user) ? "\"$user\"" : 'ANY_USER';
+        $cfg_s = sprintf('checks += [("%s", "ps", "%s", ("%s", %s, %s, %s, %s, %s)),]', $host, $cname, $proc, $user, $warnmin, $okmin, $okmax, $warnmax);
+
+        if(!$fh)
+        {
+            throw Exception("Could not open file for writing: " . $this->cfg_file);
+        }
+
+        if(fwrite($fh, $cfg_s) == FALSE)
+        {
+            throw Exception("Could not write to file: " . $this->cfg_file);
+        }
+
+        fclose($fh);
+    }
+}
+
 class CheckMk
 {
 
@@ -43,6 +72,32 @@ class CheckMk
             throw Exception("Could not execute check_mk.");
         }
 	}
+
+    public function restart($site)
+    {
+        $cmd = "/omd/sites/$site/bin/check_mk -R";
+        $fptr = popen($cmd, 'r');
+        if(!$fptr)
+        {
+            throw Exception("Could not execute check_mk.");
+        }
+        pclose($fptr);
+    }
+
+    public function inventory($host, $check=false)
+    {
+        $cmd = $this->python_path . ' ' . $this->checkmk_path . ' ';
+        $cmd .= '--defaults ' . $this->defaults_path . ' ';
+        $cmd .= ($check) ? "--checks=$check " : '';
+        $cmd .= "-I $host";
+
+        $fptr = popen($cmd, 'r');
+        if(!$fptr)
+        {
+            throw Exception("Could not execute check_mk.");
+        }
+        pclose($fptr);
+    }
 
     public function section($section)
     {

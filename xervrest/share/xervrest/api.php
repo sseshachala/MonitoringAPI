@@ -1,5 +1,8 @@
 <?php
 
+    include_once('lib/common.php');
+    include_once('lib/checkmk.php');
+
     class LQL
     {
         public $supported_verbs = Array('GET', 'COMMAND');
@@ -119,6 +122,12 @@
             'schedule_service_check' => Array('verb' => 'COMMAND', 'params' => Array( 'host' => 0, 'service' => 1)),
             'delete_comment' => Array('verb' => 'COMMAND', 'params' => Array( 'comment_id' => 0, )),
             'remove_host_acknowledgement' => Array('verb' => 'COMMAND', 'params' => Array( 'host' => 0, )),
+
+            'getprocess' => Array('verb' => 'CHECKMK', 'params' => Array( 'host' => 0, 'proc' => 1 )),
+            'add_proc_check' => Array('verb' => 'CHECKMK', 'params' => Array( 'host' => 0, 'cname' => 1, 'proc' => 2, 
+                'user' => 3, 'warnmin' => 4, 'okmin' => 5, 'okmax' => 6, 'warnmax' => 7 )),
+            'del_proc_check' => Array('verb' => 'CHECKMK', 'params' => Array( 'host' => 0, 'cname' => 1)),
+            'host_proc_checks' => Array('verb' => 'CHECKMK', 'params' => Array( 'host' => 0, )),
         );
 
         private $livestatus_obj;
@@ -200,6 +209,11 @@
             }
             
             if( $this->implemented[$method]['verb'] == 'COMMAND' )
+            {
+                return $this->handle_command_params($method, $params);
+            }
+
+            if( $this->implemented[$method]['verb'] == 'CHECKMK' )
             {
                 return $this->handle_command_params($method, $params);
             }
@@ -319,6 +333,94 @@
         {
             $cmd = "REMOVE_HOST_ACKNOWLEDGEMENT;$host";
             return $this->do_command($cmd);
+        }
+
+        public function _format_ps($data)
+        {
+            $tmp = Array();
+            $i = 0;
+            foreach($data as $n)
+            {
+                $m = Array();
+                preg_match("/\((.*?),(\d+),(\d+),(.*?)\)\s+(.*?)$/", $n, $m);
+
+                $tmp[$i] = Array( 'user' => $m[1], 'vsz' => $m[2], 'rss' => $m[3], 'pcpu' => $m[4], 'command' => $m[5] );
+                $i++;
+            }
+            return $tmp;
+        }
+
+        public function getprocess($host, $proc=false)
+        {
+            $site = get_site();
+            $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+            $cmk->execute($host);
+            $ps = $cmk->section('ps');
+
+            if($proc)
+            {
+                $ps = preg_grep("/$proc/i", $ps);
+            }
+
+            $ps = $this->_format_ps($ps);
+
+            return str_replace('\/','/', json_encode($ps));
+        }
+
+        public function restart_site()
+        {
+            $site = get_site();
+            $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+            $cmk->restart($site);
+            return "Request Submitted";
+        }
+
+        public function add_proc_check($host, $cname, $proc, $user=false, $warnmin=1, $okmin=1, $okmax=1, $warnmax=1)
+        {
+            $site = get_site();
+
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $cfg_file = sprintf("%s/xervrest_ps_%s_%s.mk", $cfg_root, $host, $cname);
+
+            $cfg = new CheckMkCfg($cfg_file);
+            $cfg->add_ps_check($host, $cname, $proc, $user, $warnmin, $okmin, $okmax, $warnmax);
+
+            return "Request Submitted";
+        }
+
+        public function del_proc_check($host, $cname)
+        {
+            $site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $cfg_file = sprintf("%s/xervrest_ps_%s_%s.mk", $cfg_root, $host, $cname);
+
+            if(unlink($cfg_file) == FALSE)
+            {
+                throw Exception("Could not remove file $cfg_file");
+            }
+
+            $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+            $cmk->restart($site);
+
+            return "Request Submitted";
+        }
+
+
+        public function host_proc_checks($host)
+        {
+            $site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+
+            $raw_files = glob("$cfg_root/xervrest_ps_$host*.mk");
+            $files = Array();
+
+            foreach($raw_files as $f)
+            {
+                $f = preg_replace("/.*xervrest_ps_(.*?)_(.*?)\.mk/", '$2', $f);
+                array_push($files, $f);
+            }
+
+            return json_encode($files);
         }
     }
 ?>
