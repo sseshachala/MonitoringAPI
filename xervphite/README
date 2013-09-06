@@ -1,15 +1,15 @@
-Graphios
+xervphite
 --------
 
 Installation:
 
 1.) Untar the tarball like this:
 
-    tar -C /omd/versions/default -xzvf graphios-0.1.tgz
+    tar -C /omd/versions/default -xzvf xervphite-0.1.tgz
 
 2.) Edit the skeleton config like this:
 
-    vi /omd/versions/default/skel/etc/graphios/graphios.ini
+    vi /omd/versions/default/skel/etc/xervphite/xervphite.ini
 
     #Change carbon_server to the ip/host of the graphite server. This will be the default server for all new sites.
 
@@ -27,5 +27,5 @@ Migration script
 
 WARNING! This script will *NOT* restart any sites and the changes it makes will only reflect once the site has been restarted.
 
-sudo python /omd/versions/default/bin/graphios_site_migrate.py
+sudo python /omd/versions/default/bin/xervphite_site_migrate.py
 
