@@ -6,9 +6,13 @@
         return $tmp_a[1];
     }
 
+	function response_json($type, $response)
+	{
+		return json_encode( array( 'response' => $type, 'message' => $response ) );
+	}
+
 	function error_json($err_string)
 	{
 		return json_encode( array( 'response' => 'error', 'message' => $err_string ) );
 	}
-
 ?>

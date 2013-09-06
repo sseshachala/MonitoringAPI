@@ -128,6 +128,7 @@
                 'user' => 3, 'warnmin' => 4, 'okmin' => 5, 'okmax' => 6, 'warnmax' => 7 )),
             'del_proc_check' => Array('verb' => 'CHECKMK', 'params' => Array( 'host' => 0, 'cname' => 1)),
             'host_proc_checks' => Array('verb' => 'CHECKMK', 'params' => Array( 'host' => 0, )),
+            'enable_host_checks' => Array('verb' => 'CHECKMK', 'params' => Array( 'host' => 0, )),
         );
 
         private $livestatus_obj;
@@ -405,7 +406,6 @@
             return "Request Submitted";
         }
 
-
         public function host_proc_checks($host)
         {
             $site = get_site();
@@ -421,6 +421,47 @@
             }
 
             return json_encode($files);
+        }
+
+        public function get_graphite_url()
+        {
+            $site = get_site();
+            $graphios_cfg_file = "/omd/sites/$site/etc/graphios/graphios.ini";
+
+            if(!file_exists($graphios_cfg_file))
+            {
+                return error_json("Graphios config file not found."); 
+            }
+
+            $graphios_cfg = parse_ini_file($graphios_cfg_file, true);
+
+            if(!$graphios_cfg)
+            {
+                return error_json("Failed to parse graphios config.");
+            }
+
+            if(!$graphios_cfg['graphios']['carbon_server'])
+            {
+                return error_json("Graphios 'carbon_server' option not found.");
+            }
+
+            $username = 'xervmon';
+            $password = 'xervmon';
+
+            $url = "http://$username:$password" . '@' . $graphios_cfg['graphios']['carbon_server'];
+
+            return str_replace('\/','/', json_encode( Array('graphite_url' => $url) ));
+        }
+
+        public function enable_host_checks($host)
+        {
+            $site = get_site();
+
+            $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+            $cmk->cmk_cmd($site, " -I $host");
+            $cmk->cmk_cmd($site, " -R");
+
+            return response_json('request_submitted', 'The request has been executed.');
         }
     }
 ?>

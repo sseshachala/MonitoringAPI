@@ -73,6 +73,27 @@ class CheckMk
         }
 	}
 
+    public function cmk_cmd($site, $cmd)
+    {
+        $cmd = "/omd/sites/$site/bin/check_mk $cmd";
+        $fptr = popen($cmd, 'r');
+        if(!$fptr)
+        {
+            return false;
+        }
+
+        $output = '';
+
+        while(!feof($fptr))
+        {
+            $output .= fread($fptr, 1024);
+        }
+
+        fclose($fptr);
+
+        return $output;
+    }
+
     public function restart($site)
     {
         $cmd = "/omd/sites/$site/bin/check_mk -R";
@@ -81,6 +102,23 @@ class CheckMk
         {
             throw Exception("Could not execute check_mk.");
         }
+        pclose($fptr);
+    }
+
+    public function auto_inventory($site, $host=false)
+    {
+        $cmd = "/omd/sites/$site/bin/check_mk -I";
+        if($host)
+        {
+            $cmd .= " $host";
+        }
+
+        $fptr = popen($cmd, 'r');
+        if(!$fptr)
+        {
+            throw Exception("Could not execute check_mk.");
+        }
+
         pclose($fptr);
     }
 
