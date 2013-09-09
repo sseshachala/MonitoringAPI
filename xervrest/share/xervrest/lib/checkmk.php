@@ -79,7 +79,7 @@ class CheckMk
         $fptr = popen($cmd, 'r');
         if(!$fptr)
         {
-            return false;
+            throw Exception("Could not execute command $cmd");
         }
 
         $output = '';
@@ -96,13 +96,7 @@ class CheckMk
 
     public function restart($site)
     {
-        $cmd = "/omd/sites/$site/bin/check_mk -R";
-        $fptr = popen($cmd, 'r');
-        if(!$fptr)
-        {
-            throw Exception("Could not execute check_mk.");
-        }
-        pclose($fptr);
+        $this->cmk_cmd($site, ' -R');
     }
 
     public function auto_inventory($site, $host=false)

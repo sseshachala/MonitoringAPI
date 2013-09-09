@@ -8,6 +8,14 @@
 
 	$app = new \Slim\Slim( Array('log.enabled' => true, 'log.level' => \Slim\Log::DEBUG) );
 
+    $app->get('/', function() use ($app) {
+        $app->redirect('index.html');
+    });
+
+    $app->get('/index.html', function() use ($app) {
+        $app->render('index.html', Array());
+    });
+
 	$app->get('/:method', function ($method) use ($app) {
 
 		$app->contentType('application/json');

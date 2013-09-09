@@ -227,7 +227,7 @@
 
             if($offset > count($results_a) -1)
             {
-                throw Exception("Offset ($offset) is larger than row count.");
+                return error_json("Offset ($offset) is larger than row count.");
             }
 
             if($limit < 1)
@@ -242,7 +242,12 @@
 
         public function do_get($table, $columns=false, $filters=false, $limit=false, $offset=false)
         {
-            $query = new LQL('GET');
+            try {
+                $query = new LQL('GET');
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+
             $query->table($table);
 
             if($columns)
@@ -270,18 +275,22 @@
 
         public function do_command($command)
         {
-            $query = new LQL('COMMAND');
+            try {
+                $query = new LQL('GET');
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+
             $query->command($command);
             $resp = $this->livestatus_obj->query($query->as_string(), true);
             $this->livestatus_obj->close();
-            return "Request Submitted";
+            return response_json('success', 'The request has been executed.');
         }
 
         public function ack_host($host, $message)
         {
             $cmd = "ACKNOWLEDGE_HOST_PROBLEM;$host;0;0;0;nagiosadmin;$message";
             return $this->do_command($cmd);
-
         }
 
         public function ack_hosts($hosts, $message)
@@ -354,9 +363,13 @@
         public function getprocess($host, $proc=false)
         {
             $site = get_site();
-            $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
-            $cmk->execute($host);
-            $ps = $cmk->section('ps');
+            try {
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $cmk->execute($host);
+                $ps = $cmk->section('ps');
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
 
             if($proc)
             {
@@ -371,9 +384,14 @@
         public function restart_site()
         {
             $site = get_site();
-            $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
-            $cmk->restart($site);
-            return "Request Submitted";
+            try {
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $cmk->restart($site);
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+
+            return response_json('success', 'The request has been executed.');
         }
 
         public function add_proc_check($host, $cname, $proc, $user=false, $warnmin=1, $okmin=1, $okmax=1, $warnmax=1)
@@ -383,10 +401,14 @@
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
             $cfg_file = sprintf("%s/xervrest_ps_%s_%s.mk", $cfg_root, $host, $cname);
 
-            $cfg = new CheckMkCfg($cfg_file);
-            $cfg->add_ps_check($host, $cname, $proc, $user, $warnmin, $okmin, $okmax, $warnmax);
+            try {
+                $cfg = new CheckMkCfg($cfg_file);
+                $cfg->add_ps_check($host, $cname, $proc, $user, $warnmin, $okmin, $okmax, $warnmax);
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
 
-            return "Request Submitted";
+            return response_json('success', 'The request has been executed.');
         }
 
         public function del_proc_check($host, $cname)
@@ -395,15 +417,22 @@
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
             $cfg_file = sprintf("%s/xervrest_ps_%s_%s.mk", $cfg_root, $host, $cname);
 
-            if(unlink($cfg_file) == FALSE)
+            try 
             {
-                throw Exception("Could not remove file $cfg_file");
+                if(unlink($cfg_file) == FALSE)
+                {
+                    return error_json("Could not remove file $cfg_file");
+                }
+
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $cmk->cmk_cmd($site, " -R");
+            } 
+            catch(Exception $exc)
+            {
+                return error_json( $exc->getMessage() );
             }
 
-            $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
-            $cmk->restart($site);
-
-            return "Request Submitted";
+            return response_json('success', 'The request has been executed.');
         }
 
         public function host_proc_checks($host)
@@ -457,11 +486,15 @@
         {
             $site = get_site();
 
-            $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
-            $cmk->cmk_cmd($site, " -I $host");
-            $cmk->cmk_cmd($site, " -R");
+            try {
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $cmk->cmk_cmd($site, " -I $host");
+                $cmk->cmk_cmd($site, " -R");
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
 
-            return response_json('request_submitted', 'The request has been executed.');
+            return response_json('success', 'The request has been executed.');
         }
     }
 ?>
