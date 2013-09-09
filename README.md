@@ -110,7 +110,7 @@ Read more abou the ps check here: http://mathias-kettner.de/checkmk_check_ps.htm
 
 Example:
 
-http://<server>/<site>/xervrest/add_proc_check?host=server01.example.com&cname=webserver&proc=apache2&warnmin=1&okmin=3&okmax=10&warnmax=13
+http://<server>/<site>/xervrest/add_proc_check?host=server01.example.com&cname=webserver&proc=~apache2&warnmin=1&okmin=3&okmax=10&warnmax=13
 
 The API call above would add check called "webserver" for server01.example.com for a proc which contains the the string apache2 being run by any user.
 
