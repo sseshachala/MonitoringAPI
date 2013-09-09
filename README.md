@@ -85,13 +85,36 @@ Added a process check:
 http://<server>/<site>/xervrest/add_proc_check?host=<host>&cname=<unique name>&proc=/usr/bin/myproc&user=<user>&warnmin=<n>&okmin=<n>&okmax=<n>&warnmax=<n>
 
 host = host name as in check_mk
+
 cname = A unique name for the check. Example: apache
-proc = the name of the process (can be a wildcard as per the check_mk docs). E.g. /usr/sbin/apache
+
+proc = It must exactly match the first column of the agents output. Or - if the string is beginning with a tilde (~) - it is interpreted as a regular expression that must match the beginning of the process line as output by the agent.
+
+Example: proc=/usr/bin/apache2 or proc=~apache
+
 user = user that should be running the process. default is any user
-warnmin = See http://mathias-kettner.de/checkmk_check_ps.html
-okmin = See http://mathias-kettner.de/checkmk_check_ps.html
-okmax = See http://mathias-kettner.de/checkmk_check_ps.html
-warnmax = See http://mathias-kettner.de/checkmk_check_ps.html
+
+warnmin = Minimum number of matched process for WARNING state (default is 1). This is the minimum amount of processes that will cause a WARNING.
+
+okmin = Minimum number for OK state (default is 1). The amount of processes that need to be running for the check to be OK.
+
+okmax = Maximum number for OK state (default is 1). This maximum amount of processes that will cause a check to be OK. Any more than this will cause CRITICAL.
+
+warnmax = Maximum number for WARNING state (default is 1). The maximum amount of processes that will cause a WARNING.
+
+Process counts more than warnmax will cause CRITICAL.
+
+Process counts less than warnmin will cause CRITICAL.
+
+Read more abou the ps check here: http://mathias-kettner.de/checkmk_check_ps.html
+
+Example:
+
+http://<server>/<site>/xervrest/add_proc_check?host=server01.example.com&cname=webserver&proc=apache2&warnmin=1&okmin=3&okmax=10&warnmax=13
+
+The API call above would add check called "webserver" for server01.example.com for a proc which contains the the string apache2 being run by any user.
+
+The check would cause WARNING if there was only 1 single apache process and a WARNING if there were up to 13 processes. Anything between 3 and 10 would be OK.
 
 Delete a check:
 http://<server>/<site>/xervrest/del_proc_check?host=<host>&cname=<unique name>
