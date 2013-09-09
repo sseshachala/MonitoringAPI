@@ -1,0 +1,127 @@
+<h1>REST API<h1>
+<BR><h2>Installing</h2>
+<BR>
+<BR>1.) Install OMD
+<BR>
+<BR>2.) Untar zervrest.tgz
+<BR>
+<BR>3.) Create site
+<BR>
+<BR>4.) Start site
+<BR>
+<BR>5.) Add hosts
+<BR>
+<BR><h2>Brief API documentation</h2>
+<BR>
+<BR><h3>List of 'GET' methods</h3>
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/hosts
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/services
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/hostgroups
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/servicegroups
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/contactgroups
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/servicesbygroup
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/servicesbyhostgroup
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/hostsbygroup
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/contacts
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/commands
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/timeperiods
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/downtimes
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/comments
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/log
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/status
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/columns
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/statehist
+<BR>
+<BR><h3>Columns & Filters:</h3>
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/hosts?columns=&lt;col&gt;,&lt;col&gt;,&lt;col&gt;
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/hosts?filter0=&lt;filter&gt;&filter1=&lt;filter&gt;
+<BR>
+<BR><h3>Limit & Offset:</h3>
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/hosts?limit=&lt;n&gt;&offset=&lt;n&gt;
+<BR>
+<BR>
+<BR><h2>List of 'ACTION' methods</h2>
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/ack_host?host=&lt;hostname&gt;&message=&lt;message&gt;
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/ack_service?ack_service=&lt;servername&gt;&message=&lt;message&gt;
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/schedule_host_check?host=&lt;hostname&gt;
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/schedule_host_services_check?host=&lt;hostname&gt;
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/schedule_service_check?host=&lt;hostname&gt;&service=&lt;servername&gt;
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/delete_comment?comment_id=&lt;comment_id&gt;
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/remove_host_acknowledgement?host=&lt;hostname&gt;
+<BR>
+<BR><h2>Process Methods</h2>
+<BR>
+<BR>Added a process check:
+<BR>http://omd-server-ip/cust_site_01/xervrest/add_proc_check?host=&lt;host&gt;&cname=&lt;unique name&gt;&proc=/usr/bin/myproc&user=&lt;user&gt;&warnmin=&lt;n&gt;&okmin=&lt;n&gt;&okmax=&lt;n&gt;&warnmax=&lt;n&gt;
+<BR>
+<BR>host = host name as in check_mk
+<BR>
+<BR>cname = A unique name for the check. Example: apache
+<BR>
+<BR>proc = It must exactly match the first column of the agents output. Or - if the string is beginning with a tilde (~) - it is interpreted as a regular expression that must match the beginning of the process line as output by the agent.
+<BR>
+<BR>Example: proc=/usr/bin/apache2 or proc=~apache
+<BR>
+<BR>user = user that should be running the process. default is any user
+<BR>
+<BR>warnmin = Minimum number of matched process for WARNING state (default is 1). This is the minimum amount of processes that will cause a WARNING.
+<BR>
+<BR>okmin = Minimum number for OK state (default is 1). The amount of processes that need to be running for the check to be OK.
+<BR>
+<BR>okmax = Maximum number for OK state (default is 1). This maximum amount of processes that will cause a check to be OK. Any more than this will cause CRITICAL.
+<BR>
+<BR>warnmax = Maximum number for WARNING state (default is 1). The maximum amount of processes that will cause a WARNING.
+<BR>
+<BR>Process counts more than warnmax will cause CRITICAL.
+<BR>
+<BR>Process counts less than warnmin will cause CRITICAL.
+<BR>
+<BR>Read more abou the ps check here: http://mathias-kettner.de/checkmk_check_ps.html
+<BR>
+<BR><i>Example:</i>
+<BR>
+<BR>http://omd-server-ip/cust_site_01/xervrest/add_proc_check?host=server01.example.com&cname=webserver&proc=~apache2&warnmin=1&okmin=3&okmax=10&warnmax=13
+<BR>
+<BR>The API call above would add check called "webserver" for server01.example.com for a proc which contains the the string apache2 being run by any user.
+<BR>
+<BR>The check would cause WARNING if there was only 1 single apache process and a WARNING if there were up to 13 processes. Anything between 3 and 10 would be OK.
+<BR>
+<BR>Delete a check:
+<BR>http://omd-server-ip/cust_site_01/xervrest/del_proc_check?host=&lt;host&gt;&cname=&lt;unique name&gt;
+<BR>
+<BR>List of xervrest checks added:
+<BR>http://omd-server-ip/cust_site_01/xervrest/host_proc_checks?host=&lt;host>
+<BR>
+<BR>Returns a json array containing the cnames of all the ps checks added via the REST API for the given host
+<BR>
+<BR>Restart Nagios:
+<BR>http://omd-server-ip/cust_site_01/xervrest/restart_site
+<BR>
+<BR>Will issue the check_mk -R command for the site.
