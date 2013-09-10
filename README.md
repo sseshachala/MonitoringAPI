@@ -128,3 +128,35 @@ Restart Nagios:
 http://<server>/<site>/xervrest/restart_site
 
 Will issue the check_mk -R command for the site.
+
+Contacts:
+---------
+
+Adding:
+http://<server>/<site>/xervrest/add_contact?contact_name=<name>
+
+Mandatory parameter: contact_name
+Other paramters: Defined in Nagios doc: http://nagios.sourceforge.net/docs/3_0/objectdefinitions.html#contact
+
+Deleting:
+http://<server>/<site>/xervrest/del_contact?contact_name=<name>
+
+Note: To enable contacts you must call /restart_site so that the nagios config can be reloaded
+
+
+Contact Groups:
+---------------
+
+http://<server>/<site>/xervrest/add_contact_group?contactgroup_name=<name>
+
+Mandatory parameter: contactgroup_name
+Other paramters: Defined in Nagios doc: http://nagios.sourceforge.net/docs/3_0/objectdefinitions.html#contactgroup
+
+Deleting:
+http://<server>/<site>/xervrest/del_contact_group?contact_name=<name>
+
+Note: To enable contacts you must call /restart_site so that the nagios config can be reloaded
+
+
+
+

@@ -27,11 +27,58 @@ class CheckMkCfg
 
         fclose($fh);
     }
+    
+    public function add_contact($params)
+    {
+        $fh = fopen($this->cfg_file, 'w');
+        
+        if(!$fh)
+        {
+            throw Exception("Could not open file for writing: " . $this->cfg_file);
+        }
+        
+        $cfg = "define contact {\n";
+        foreach($params as $key => $val)
+        {
+            $cfg .= "\t$key\t\t$val\n";
+        }
+        $cfg .= "}\n";
+        
+        if(fwrite($fh, $cfg) == FALSE)
+        {
+            throw Exception("Could not write to file: " . $this->cfg_file);
+        }
+        
+        fclose($fh);
+    }
+    
+    public function add_contact_group($params)
+    {
+        $fh = fopen($this->cfg_file, 'w');
+        
+        if(!$fh)
+        {
+            throw Exception("Could not open file for writing: " . $this->cfg_file);
+        }
+        
+        $cfg = "define contactgroup {\n";
+        foreach($params as $key => $val)
+        {
+            $cfg .= "\t$key\t\t$val\n";
+        }
+        $cfg .= "}\n";
+        
+        if(fwrite($fh, $cfg) == FALSE)
+        {
+            throw Exception("Could not write to file: " . $this->cfg_file);
+        }
+        
+        fclose($fh);
+    }
 }
 
 class CheckMk
 {
-
 	public $checkmk_path = '/omd/versions/default/share/check_mk/modules/check_mk.py';
 	public $python_path = '/usr/bin/python';
     public $defaults_path;

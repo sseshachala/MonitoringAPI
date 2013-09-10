@@ -4,8 +4,27 @@
 	include_once( 'lib/livestatus.php' );
 	include_once( 'api.php' );
 
-	\Slim\Slim::registerAutoloader();
-
+    function get_live_object()
+    {
+        $site = get_site();
+        $sock_file = "/omd/sites/$site/tmp/run/live";
+        $live = new LiveStatus($sock_file);
+        
+        if(!file_exists($sock_file))
+        {
+            throw Exception("Socket file ($sock_file) not found.");
+        }
+        
+        if(!$live)
+        {
+            throw Exception("There was an error connecting to the socket.");
+        }
+        
+        return $live;
+    }
+    
+    \Slim\Slim::registerAutoloader();
+    
 	$app = new \Slim\Slim( Array('log.enabled' => true, 'log.level' => \Slim\Log::DEBUG) );
 
     $app->get('/', function() use ($app) {
@@ -15,30 +34,105 @@
     $app->get('/index.html', function() use ($app) {
         $app->render('index.html', Array());
     });
+    
+    $app->get('/add_contact', function() use ($app) {
+		$app->contentType('application/json');
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        $params = $app->request->params();
+        print $rest->add_contact($params);
+    });
+    
+    $app->get('/del_contact', function() use ($app) {
+		$app->contentType('application/json');
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        $params = $app->request->params();
+        print $rest->del_contact($params);
+    });
+    
+    $app->get('/add_contact_group', function() use ($app) {
+		$app->contentType('application/json');
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        $params = $app->request->params();
+        print $rest->add_contact_group($params);
+    });
 
+    $app->get('/del_contact_group', function() use ($app) {
+		$app->contentType('application/json');
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        $params = $app->request->params();
+        print $rest->del_contact_group($params);
+    });
+    
+    $app->get('/add_proc_check', function() use ($app) {
+		$app->contentType('application/json');
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        $params = $app->request->params();
+        print $rest->add_proc_check($params);
+    });
+
+    $app->get('/del_proc_check', function() use ($app) {
+		$app->contentType('application/json');
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        $params = $app->request->params();
+        print $rest->del_proc_check($params);
+    });
+    
+    
 	$app->get('/:method', function ($method) use ($app) {
 
 		$app->contentType('application/json');
 
-		$site = get_site();
-
-		$sock_file = "/omd/sites/$site/tmp/run/live";
-
-		if(!file_exists($sock_file))
-		{
-			$app->log->error("Unix socket ($sock_file) does not exist.");
-			exit(error_json("Socket file ($sock_file) not found."));
-		}
-
-        $live = new LiveStatus($sock_file);
-
-        if(!$live)
-        {
-			exit(error_json("There was an error connecting to the socket."));
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
         }
-
+        
         $rest = new XervRest($live);
         $params = $app->request->params();
+        
         if($params)
         {
             $params = $rest->handle_params($method, $params);

@@ -393,17 +393,156 @@
 
             return response_json('success', 'The request has been executed.');
         }
-
-        public function add_proc_check($host, $cname, $proc, $user=false, $warnmin=1, $okmin=1, $okmax=1, $warnmax=1)
+        
+        private function _param_defaults($params, $defaults)
         {
+            foreach($defaults as $key => $val)
+            {
+                if(!array_key_exists($key, $params))
+                {
+                    $params[$key] = $val; 
+                }
+            }
+            
+            return $params;
+        }
+        
+        private function _check_params($params, $mandatory)
+        {
+            $missing = Array();
+            foreach($mandatory as $key)
+            {
+                if(!array_key_exists($key, $params))
+                {
+                    array_push($missing, $key);
+                }
+            }
+            return $missing;
+        }
+        
+        public function add_contact($params)
+        {
+        
+            $missing_params = $this->_check_params($params, Array('contact_name'));
+            
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
             $site = get_site();
-
-            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $cfg_file = sprintf("%s/xervrest_ps_%s_%s.mk", $cfg_root, $host, $cname);
+            $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
+            $cfg_file = sprintf("%s/xervrest_contact_%s_%s.cfg", $cfg_root, $site, $params['contact_name']);
 
             try {
                 $cfg = new CheckMkCfg($cfg_file);
-                $cfg->add_ps_check($host, $cname, $proc, $user, $warnmin, $okmin, $okmax, $warnmax);
+                $cfg->add_contact($params);
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+
+            return response_json('success', 'The request has been executed.');
+        }
+        
+        public function del_contact($params)
+        {
+            $missing_params = $this->_check_params($params, Array('contact_name'));
+            
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
+            $cfg_file = sprintf("%s/xervrest_contact_%s_%s.cfg", $cfg_root, $site, $params['contact_name']);
+
+            try 
+            {
+                if(unlink($cfg_file) == FALSE)
+                {
+                    return error_json("Could not remove file $cfg_file");
+                }
+
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $cmk->cmk_cmd($site, " -R");
+            } 
+            catch(Exception $exc)
+            {
+                return error_json( $exc->getMessage() );
+            }
+
+            return response_json('success', 'The request has been executed.');
+        }
+        
+        public function add_contact_group($params)
+        {
+        
+            $missing_params = $this->_check_params($params, Array('contactgroup_name'));
+            
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
+            $cfg_file = sprintf("%s/xervrest_contactgroup_%s_%s.cfg", $cfg_root, $site, $params['contactgroup_name']);
+
+            try {
+                $cfg = new CheckMkCfg($cfg_file);
+                $cfg->add_contact_group($params);
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+
+            return response_json('success', 'The request has been executed.');
+        }
+        
+        public function del_contact_group($params)
+        {
+            $missing_params = $this->_check_params($params, Array('contactgroup_name'));
+            
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
+            $cfg_file = sprintf("%s/xervrest_contactgroup_%s_%s.cfg", $cfg_root, $site, $params['contactgroup_name']);
+
+            try 
+            {
+                if(unlink($cfg_file) == FALSE)
+                {
+                    return error_json("Could not remove file $cfg_file");
+                }
+
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $cmk->cmk_cmd($site, " -R");
+            } 
+            catch(Exception $exc)
+            {
+                return error_json( $exc->getMessage() );
+            }
+
+            return response_json('success', 'The request has been executed.');
+        }
+        
+        public function add_proc_check($params)
+        {
+            $site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $cfg_file = sprintf("%s/xervrest_ps_%s_%s.mk", $cfg_root, $params['host'], $params['cname']);
+
+            $defaults = Array('user' => false, 'warnmin' => 1, 'okmin' => 1, 'okmax' => 1, 'warnmax' => 1);
+            $params = $this->_param_defaults($params, $defaults);
+
+            try {
+                $cfg = new CheckMkCfg($cfg_file);
+                $cfg->add_ps_check($params['host'], $params['cname'], $params['proc'], $params['user'], 
+                                    $params['warnmin'], $params['okmin'], $params['okmax'], $params['warnmax']);
             } catch(Exception $e) {
                 return error_json( $e->getMessage() );
             }
@@ -411,11 +550,18 @@
             return response_json('success', 'The request has been executed.');
         }
 
-        public function del_proc_check($host, $cname)
+        public function del_proc_check($params)
         {
+            $missing_params = $this->_check_params($params, Array('host', 'cname'));
+            
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+        
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $cfg_file = sprintf("%s/xervrest_ps_%s_%s.mk", $cfg_root, $host, $cname);
+            $cfg_file = sprintf("%s/xervrest_ps_%s_%s.mk", $cfg_root, $params['host'], $params['cname']);
 
             try 
             {
