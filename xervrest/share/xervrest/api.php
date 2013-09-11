@@ -425,23 +425,22 @@
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
             $cfg_file = sprintf("%s/xervrest_contactgroup_%s_%s.cfg", $cfg_root, $site, $contactgroup_name);
-            $data = '';
+            $data = file($cfg_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             
-            try {
-                $fh = fopen($cfg_file, 'r');
-            } catch(Exception $e) {
-                exit(error_json( $e->getMessage() ));
-            }
-            
-            while(!feof($fh))
+            if(!$data)
             {
-                $data .= fread($fh, 1024);
+                exit(error_json("Could not open and read file $cfg_file"));
             }
-            fclose($fh);
             
-            $data = preg_replace("/.*?members\s+(.*?)\s+/", '$1', $data);
-            $data = str_replace(' ','', $data);
-            return explode(',', $data);
+            foreach($data as $line)
+            {
+                if(preg_match("/members\s+/", $line))
+                {
+                    return explode(',', preg_replace("/.*members\s+(.*?)\s+/", '$1', $line));
+                }
+            }
+            
+            return Array();
         }
         
         private function _is_in_contact_group($contact)
@@ -700,7 +699,28 @@
 
             return str_replace('\/','/', json_encode( Array('graphite_url' => $url) ));
         }
-
+        
+        public function graph_name_map()
+        {
+            $map = Array(
+                'CPU load' => Array('load1', 'load5', 'load15'),
+                'CPU utilization' => Array('user', 'wait'),
+                'Disk IO SUMMARY' => Array('read', 'write'),
+                'Interface 2' => Array('in', 'inucast', 'innucast', 'indisc', 'inerr', 'out', 'outucast', 'outdisc', 'outerr', 'outqlen'),
+                'Kernel Context Switches' => Array('ctxt'),
+                'Kernel Major Page Faults' => Array('pgmajfault'),
+                'Kernel Process Creations' => Array('processes'),
+                'Memory used' => Array('ramused', 'swapused', 'memused'),
+                'Number of threads' => Array('threads'),
+                'Postfix Queue' => Array('length'),
+                'TCP Connections' => Array('ESTABLISHED', 'SYN_SENT', 'SYN_RECV', 'LAST_ACK', 'CLOSE_WAIT', 'TIME_WAIT', 'CLOSED', 'CLOSING', 'FIN_WAIT1', 'FIN_WAIT2', 'BOUND'),
+                'Uptime' => Array('uptime'),
+                'fs_/' => Array('/' ,'growth', 'trend'),
+                'fs_/boot' => Array('/boot' ,'growth', 'trend'),
+                'Check_MK' => Array('execution_time'),
+            );
+            return str_replace('\/','/', json_encode($map));
+        }
         public function enable_host_checks($host)
         {
             $site = get_site();

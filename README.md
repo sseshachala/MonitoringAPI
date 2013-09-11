@@ -157,6 +157,9 @@ http://<server>/<site>/xervrest/del_contact_group?contact_name=<name>
 
 Note: To enable contacts you must call /restart_site so that the nagios config can be reloaded
 
-
+Graphing and graphite:
+----------------------
+http://<server>/<site>/xervrest/get_graphite_url - return the graphite URL that is configured for the site.
+http://<server>/<site>/xervrest/graph_name_map - list the mapping of service descriptions and their performance components.
 
 
