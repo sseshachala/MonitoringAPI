@@ -420,6 +420,52 @@
             return $missing;
         }
         
+        private function _get_contact_group_members($contactgroup_name)
+        {
+            $site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
+            $cfg_file = sprintf("%s/xervrest_contactgroup_%s_%s.cfg", $cfg_root, $site, $contactgroup_name);
+            $data = '';
+            
+            try {
+                $fh = fopen($cfg_file, 'r');
+            } catch(Exception $e) {
+                exit(error_json( $e->getMessage() ));
+            }
+            
+            while(!feof($fh))
+            {
+                $data .= fread($fh, 1024);
+            }
+            fclose($fh);
+            
+            $data = preg_replace("/.*?members\s+(.*?)\s+/", '$1', $data);
+            $data = str_replace(' ','', $data);
+            return explode(',', $data);
+        }
+        
+        private function _is_in_contact_group($contact)
+        {
+            $site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
+            $raw_files = glob("$cfg_root/xervrest_contactgroup_*.cfg");
+            
+            foreach($raw_files as $file)
+            {
+                $contactgroup_name = preg_replace("/.*xervrest_contactgroup.*?_.*?_(.*?)\.cfg/", '$1', $file);
+                $members = $this->_get_contact_group_members($contactgroup_name);
+                
+                foreach($members as $member)
+                {
+                    if($member == $contact)
+                    {
+                        return $contactgroup_name;
+                    }
+                }
+            }
+            return false;
+        }
+        
         public function add_contact($params)
         {
         
@@ -456,7 +502,18 @@
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
             $cfg_file = sprintf("%s/xervrest_contact_%s_%s.cfg", $cfg_root, $site, $params['contact_name']);
+            
+            if(!file_exists($cfg_file))
+            {
+                return error_json("Cannot Delete. Contact does not exist.");
+            }
 
+            $blocking_contact_group = $this->_is_in_contact_group($params['contact_name']);
+            if($blocking_contact_group)
+            {
+                return error_json("Cannot Delete. Contact is still referenced in contact group: " . $blocking_contact_group);
+            }
+            
             try 
             {
                 if(unlink($cfg_file) == FALSE)
@@ -580,22 +637,38 @@
 
             return response_json('success', 'The request has been executed.');
         }
+        
+        private function _get_check_data($file)
+        {
+            $fh = fopen($file, 'r');
+            $data = '';
+            while(!feof($fh))
+            {
+                $data .= fread($fh, 1024);
+            }
+            fclose($fh);
+            
+            $data = preg_replace("/^.*?\(.*?\((.*?)\).*/", '$1', $data);
+            $arr = explode(',', $data);
+            
+            return Array('proc' => str_replace('"', '', $arr[0]), 'user' => $arr[1], 
+                         'warnmin' => $arr[2], 'okmin' => $arr[3], 'okmax' => $arr[4], 'warnmax' => $arr[5]);
+        }
 
         public function host_proc_checks($host)
         {
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-
             $raw_files = glob("$cfg_root/xervrest_ps_$host*.mk");
-            $files = Array();
-
-            foreach($raw_files as $f)
+            $check_data = Array();
+            
+            foreach($raw_files as $file)
             {
-                $f = preg_replace("/.*xervrest_ps_(.*?)_(.*?)\.mk/", '$2', $f);
-                array_push($files, $f);
+                $cname = preg_replace("/.*xervrest_ps_(.*?)_(.*?)\.mk/", '$2', $file);
+                $check_data[$cname] = $this->_get_check_data($file);
             }
 
-            return json_encode($files);
+            return str_replace('\/','/', json_encode($check_data));
         }
 
         public function get_graphite_url()
