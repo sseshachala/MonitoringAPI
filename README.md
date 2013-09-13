@@ -129,6 +129,11 @@ http://<server>/<site>/xervrest/restart_site
 
 Will issue the check_mk -R command for the site.
 
+Graphing and graphite:
+----------------------
+http://<server>/<site>/xervrest/get_graphite_url - return the graphite URL that is configured for the site.
+http://<server>/<site>/xervrest/graph_name_map - list the mapping of service descriptions and their performance components.
+
 Contacts:
 ---------
 
@@ -143,7 +148,6 @@ http://<server>/<site>/xervrest/del_contact?contact_name=<name>
 
 Note: To enable contacts you must call /restart_site so that the nagios config can be reloaded
 
-
 Contact Groups:
 ---------------
 
@@ -152,14 +156,33 @@ http://<server>/<site>/xervrest/add_contact_group?contactgroup_name=<name>
 Mandatory parameter: contactgroup_name
 Other paramters: Defined in Nagios doc: http://nagios.sourceforge.net/docs/3_0/objectdefinitions.html#contactgroup
 
+TAKE NOTE!!!! - Extra parameter: hosts - a comma seperated list of hosts that should be associated to the contact group (use ALL_HOSTS to specify all hosts)
+Example /add_contact_group?hosts=server01,server02
+Example /add_contact_group?hosts=ALL_HOSTS
+
 Deleting:
 http://<server>/<site>/xervrest/del_contact_group?contact_name=<name>
 
 Note: To enable contacts you must call /restart_site so that the nagios config can be reloaded
 
-Graphing and graphite:
-----------------------
-http://<server>/<site>/xervrest/get_graphite_url - return the graphite URL that is configured for the site.
-http://<server>/<site>/xervrest/graph_name_map - list the mapping of service descriptions and their performance components.
+Here is a shell script I wrote to test the contact/group methods
+#!/bin/bash
 
+USERNAME=omdadmin
+PASSWORD=omd
+SITE=c1
+SERVER=ec2-54-242-185-242.compute-1.amazonaws.com
+BASEURL=http://$SERVER/$SITE/xervrest
 
+# Add 2 contacts
+curl --user $USERNAME:$PASSWORD "$BASEURL/add_contact?contact_name=notify1&alias=NotifyContact1&host_notifications_enabled=1&service_notifications_enabled=1&service_notification_period=24x7&host_notification_period=24x7&service_notification_options=w,u,c,r&host_notification_options=d,u,r&service_notification_commands=check-mk-notify&host_notification_commands=check-mk-notify&email=notify1@kode.co.za"
+
+curl --user $USERNAME:$PASSWORD "$BASEURL/add_contact?contact_name=notify2&alias=NotifyContact2&host_notifications_enabled=1&service_notifications_enabled=1&service_notification_period=24x7&host_notification_period=24x7&service_notification_options=w,u,c,r&host_notification_options=d,u,r&service_notification_commands=check-mk-notify&host_notification_commands=check-mk-notify&email=notify2@kode.co.za"
+
+# Add contact groups
+curl --user $USERNAME:$PASSWORD "$BASEURL/add_contact_group?contactgroup_name=notifygroup1&alias=NotifyGroup1&members=notify1,notify2&hosts=server.kode.co.za"
+
+curl --user $USERNAME:$PASSWORD "$BASEURL/add_contact_group?contactgroup_name=notifygroup2&alias=NotifyGroup2&members=notify1,notify2&hosts=ALL_HOSTS"
+
+# Restart site
+curl --user $USERNAME:$PASSWORD "$BASEURL/restart_site"

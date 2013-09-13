@@ -423,8 +423,8 @@
         private function _get_contact_group_members($contactgroup_name)
         {
             $site = get_site();
-            $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
-            $cfg_file = sprintf("%s/xervrest_contactgroup_%s_%s.cfg", $cfg_root, $site, $contactgroup_name);
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $cfg_file = sprintf("%s/xervrest_contactgroup_%s_%s.mk", $cfg_root, $site, $contactgroup_name);
             $data = file($cfg_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             
             if(!$data)
@@ -434,9 +434,10 @@
             
             foreach($data as $line)
             {
-                if(preg_match("/members\s+/", $line))
+                if(preg_match("/contactgroup_members/", $line))
                 {
-                    return explode(',', preg_replace("/.*members\s+(.*?)\s+/", '$1', $line));
+                    return array_map(function($i){ return str_replace('"', '', $i); }, 
+                                        explode(',', preg_replace("/contactgroup_members.*? = \[\s+(.*?)\s+\].*/", '$1', $line)));
                 }
             }
             
@@ -446,12 +447,12 @@
         private function _is_in_contact_group($contact)
         {
             $site = get_site();
-            $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
-            $raw_files = glob("$cfg_root/xervrest_contactgroup_*.cfg");
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $raw_files = glob("$cfg_root/xervrest_contactgroup_*.mk");
             
             foreach($raw_files as $file)
             {
-                $contactgroup_name = preg_replace("/.*xervrest_contactgroup.*?_.*?_(.*?)\.cfg/", '$1', $file);
+                $contactgroup_name = preg_replace("/.*xervrest_contactgroup.*?_.*?_(.*?)\.mk/", '$1', $file);
                 $members = $this->_get_contact_group_members($contactgroup_name);
                 
                 foreach($members as $member)
@@ -540,10 +541,12 @@
             {
                 return error_json("Missing parameters: " . implode(' ', $missing_params));
             }
+
+            $params = $this->_param_defaults($params, Array('alias' => $params['contactgroup_name']));
             
             $site = get_site();
-            $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
-            $cfg_file = sprintf("%s/xervrest_contactgroup_%s_%s.cfg", $cfg_root, $site, $params['contactgroup_name']);
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $cfg_file = sprintf("%s/xervrest_contactgroup_%s_%s.mk", $cfg_root, $site, $params['contactgroup_name']);
 
             try {
                 $cfg = new CheckMkCfg($cfg_file);
@@ -565,8 +568,8 @@
             }
             
             $site = get_site();
-            $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
-            $cfg_file = sprintf("%s/xervrest_contactgroup_%s_%s.cfg", $cfg_root, $site, $params['contactgroup_name']);
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $cfg_file = sprintf("%s/xervrest_contactgroup_%s_%s.mk", $cfg_root, $site, $params['contactgroup_name']);
 
             try 
             {
@@ -585,7 +588,7 @@
 
             return response_json('success', 'The request has been executed.');
         }
-        
+
         public function add_proc_check($params)
         {
             $site = get_site();

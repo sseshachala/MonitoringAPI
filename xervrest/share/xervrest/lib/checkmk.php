@@ -60,14 +60,24 @@ class CheckMkCfg
         {
             throw Exception("Could not open file for writing: " . $this->cfg_file);
         }
-        
-        $cfg = "define contactgroup {\n";
-        foreach($params as $key => $val)
+
+        $hosts = '';
+        if($params['hosts'] == 'ALL_HOSTS')
         {
-            $cfg .= "\t$key\t\t$val\n";
+            $hosts = 'ALL_HOSTS';
         }
-        $cfg .= "}\n";
+        else
+        {
+            $hosts = '[' . implode(',', array_map(function($i){ return "\"$i\""; }, explode(',', $params['hosts']))) . ']';
+        }
+
+        $members = implode(',', array_map(function($i){ return "\"$i\""; }, explode(',', $params['members'])));
         
+        #$cfg = sprintf("define_contactgroups = { \"%s\": \"%s\"}\n", $params['contactgroup_name'], $params['alias']);
+        $cfg = "define_contactgroups = True\n";
+        $cfg .= sprintf("contactgroup_members[\"%s\"] = [ %s ]\n", $params['contactgroup_name'], $members);
+        $cfg .= sprintf("host_contactgroups.extend( [ ( \"%s\", %s ), ])\n", $params['contactgroup_name'], $hosts);
+
         if(fwrite($fh, $cfg) == FALSE)
         {
             throw Exception("Could not write to file: " . $this->cfg_file);
