@@ -122,13 +122,6 @@
             'schedule_service_check' => Array('verb' => 'COMMAND', 'params' => Array( 'host' => 0, 'service' => 1)),
             'delete_comment' => Array('verb' => 'COMMAND', 'params' => Array( 'comment_id' => 0, )),
             'remove_host_acknowledgement' => Array('verb' => 'COMMAND', 'params' => Array( 'host' => 0, )),
-
-            'getprocess' => Array('verb' => 'CHECKMK', 'params' => Array( 'host' => 0, 'proc' => 1 )),
-            'add_proc_check' => Array('verb' => 'CHECKMK', 'params' => Array( 'host' => 0, 'cname' => 1, 'proc' => 2, 
-                'user' => 3, 'warnmin' => 4, 'okmin' => 5, 'okmax' => 6, 'warnmax' => 7 )),
-            'del_proc_check' => Array('verb' => 'CHECKMK', 'params' => Array( 'host' => 0, 'cname' => 1)),
-            'host_proc_checks' => Array('verb' => 'CHECKMK', 'params' => Array( 'host' => 0, )),
-            'enable_host_checks' => Array('verb' => 'CHECKMK', 'params' => Array( 'host' => 0, )),
         );
 
         private $livestatus_obj;
@@ -468,7 +461,8 @@
         
         public function add_contact($params)
         {
-        
+            $params = $this->_param_defaults($params, Array('alias' => $params['contact_name'], 'contactgroups' => false, 'pager' => false, 'only_services' => false, 'parameters' => false ));
+            
             $missing_params = $this->_check_params($params, Array('contact_name'));
             
             if(count($missing_params) > 0)
@@ -477,12 +471,12 @@
             }
             
             $site = get_site();
-            $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
-            $cfg_file = sprintf("%s/xervrest_contact_%s_%s.cfg", $cfg_root, $site, $params['contact_name']);
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $cfg_file = sprintf("%s/xervrest_contact_%s_%s.mk", $cfg_root, $site, $params['contact_name']);
 
             try {
                 $cfg = new CheckMkCfg($cfg_file);
-                $cfg->add_contact($params);
+                $cfg->add_flexible_contact($params);
             } catch(Exception $e) {
                 return error_json( $e->getMessage() );
             }
@@ -500,8 +494,8 @@
             }
             
             $site = get_site();
-            $cfg_root = "/omd/sites/$site/etc/nagios/conf.d";
-            $cfg_file = sprintf("%s/xervrest_contact_%s_%s.cfg", $cfg_root, $site, $params['contact_name']);
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $cfg_file = sprintf("%s/xervrest_contact_%s_%s.mk", $cfg_root, $site, $params['contact_name']);
             
             if(!file_exists($cfg_file))
             {
@@ -612,7 +606,6 @@
         public function del_proc_check($params)
         {
             $missing_params = $this->_check_params($params, Array('host', 'cname'));
-            
             if(count($missing_params) > 0)
             {
                 return error_json("Missing parameters: " . implode(' ', $missing_params));
@@ -724,8 +717,9 @@
             );
             return str_replace('\/','/', json_encode($map));
         }
+        
         public function enable_host_checks($host)
-        {
+        {            
             $site = get_site();
 
             try {

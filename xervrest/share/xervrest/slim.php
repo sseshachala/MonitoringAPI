@@ -119,6 +119,69 @@
         print $rest->del_proc_check($params);
     });
     
+    $app->get('/enable_host_checks', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        if(!array_key_exists('host', $params))
+        {
+            exit(error_json("Missing parameter: host"));
+        }
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        print $rest->enable_host_checks($params['host']);
+    });
+    
+    $app->get('/host_proc_checks', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        if(!array_key_exists('host', $params))
+        {
+            exit(error_json("Missing parameter: host"));
+        }
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        print $rest->host_proc_checks($params['host']);
+    });
+    
+    $app->get('/getprocess', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        $proc = false;
+        
+        if(!array_key_exists('host', $params))
+        {
+            exit(error_json("Missing parameter: host"));
+        }
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        if(array_key_exists('proc', $params))
+        {
+            $proc = $params['proc'];
+        }
+        
+        $rest = new XervRest($live);
+        print $rest->getprocess($params['host'], $proc);
+    });
+    
     
 	$app->get('/:method', function ($method) use ($app) {
 

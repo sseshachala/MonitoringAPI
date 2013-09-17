@@ -51,6 +51,76 @@ class CheckMkCfg
         
         fclose($fh);
     }
+
+    public function add_flexible_contact($params)
+    {
+        $_tmp = Array('contactgroups', 'only_services', 'host_events', 'service_events', 'parameters');
+        foreach($_tmp as $key)
+        {
+            if(array_key_exists($key, $params))
+            {
+                if($params[$key] == false)
+                {
+                    continue;
+                }
+                
+                $params[$key] = implode(',', array_map(function($i){ return "'$i'"; }, explode(',', $params[$key])));
+            }
+        }
+
+        $cfg_tmpl = "contacts.update({'%s': {
+                   'alias': u'%s',
+                   'contactgroups': [%s],
+                   'email': '%s',
+                   'pager': '%s',
+                   'host_notification_commands': '%s',
+                   'host_notification_options': '%s',
+                   'notification_period': '%s',
+                   'notifications_enabled': True,
+                   'service_notification_commands': '%s',
+                   'service_notification_options': '%s',
+                   'notification_method': ('flexible',
+                                   [{'disabled': False,
+                                     'escalation': (2, 999999),
+                                     'host_events': [%s],
+                                     'only_services': [%s],
+                                     'parameters': [%s],
+                                     'plugin': 'debug',
+                                     'service_events': [%s],
+                                     'timeperiod': '%s'}]) }})";
+
+        $cfg = sprintf($cfg_tmpl, 
+                            $params['contact_name'], 
+                            $params['alias'], 
+                            $params['contactgroups'], 
+                            $params['email'],
+                            $params['pager'],
+                            $params['host_notification_commands'],
+                            $params['host_notification_options'],
+                            $params['notification_period'],
+                            $params['service_notification_commands'],
+                            $params['service_notification_options'],
+                            $params['host_events'],
+                            $params['only_services'],
+                            $params['parameters'],
+                            $params['service_events'],
+                            $params['timeperiod']
+                );
+
+        $fh = fopen($this->cfg_file, 'w');
+
+        if(!$fh)
+        {
+            throw Exception("Could not open file for writing: " . $this->cfg_file);
+        }
+
+        if(fwrite($fh, $cfg) == FALSE)
+        {
+            throw Exception("Could not write to file: " . $this->cfg_file);
+        }
+
+        fclose($fh);
+    }
     
     public function add_contact_group($params)
     {
