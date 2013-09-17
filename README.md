@@ -2,6 +2,7 @@ monitoting_api
 ==============
 
 1.) Install OMD
+2.)sudo apt-get install mailutils
 
 2.) Untar zervrest.tgz
 
