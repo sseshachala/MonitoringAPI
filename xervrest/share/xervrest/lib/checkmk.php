@@ -85,7 +85,7 @@ class CheckMkCfg
                                      'host_events': [%s],
                                      'only_services': [%s],
                                      'parameters': [%s],
-                                     'plugin': 'debug',
+                                     'plugin': None,
                                      'service_events': [%s],
                                      'timeperiod': '%s'}]) }})";
 
@@ -131,19 +131,20 @@ class CheckMkCfg
             throw Exception("Could not open file for writing: " . $this->cfg_file);
         }
 
+        $params['hosts'] = preg_replace('/,$/', '', $params['hosts']);
+        
         $hosts = '';
-        if($params['hosts'] == 'ALL_HOSTS')
+        if(preg_match('/ALL_HOSTS/', $params['hosts']))
         {
             $hosts = 'ALL_HOSTS';
         }
         else
         {
-            $hosts = '[' . implode(',', array_map(function($i){ return "\"$i\""; }, explode(',', $params['hosts']))) . ']';
+            $hosts = '[' . implode(',', array_map(function($i){return "\"$i\"";}, explode(',', $params['hosts']))) . ']';
         }
 
         $members = implode(',', array_map(function($i){ return "\"$i\""; }, explode(',', $params['members'])));
         
-        #$cfg = sprintf("define_contactgroups = { \"%s\": \"%s\"}\n", $params['contactgroup_name'], $params['alias']);
         $cfg = "define_contactgroups = True\n";
         $cfg .= sprintf("contactgroup_members[\"%s\"] = [ %s ]\n", $params['contactgroup_name'], $members);
         $cfg .= sprintf("host_contactgroups.extend( [ ( \"%s\", %s ), ])\n", $params['contactgroup_name'], $hosts);

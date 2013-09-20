@@ -156,7 +156,7 @@
         $rest = new XervRest($live);
         print $rest->host_proc_checks($params['host']);
     });
-    
+
     $app->get('/getprocess', function() use ($app) {
 		$app->contentType('application/json');
         $params = $app->request->params();
@@ -181,7 +181,98 @@
         $rest = new XervRest($live);
         print $rest->getprocess($params['host'], $proc);
     });
+
+    $app->get('/add_check_template', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        print $rest->add_check_template($params);
+    });
+
+    $app->get('/del_check_template', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        print $rest->del_check_template($params);
+    });
+
+    $app->get('/get_check_templates', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        print $rest->get_check_templates($params);
+    });
+
+    $app->post('/install_agent', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        $site = get_site();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        if(array_key_exists('keyfile', $_FILES))
+        {
+            if($_FILES["keyfile"]["error"] > 0)
+            {
+                exit(error_json("SSH key file upload error: " . $_FILES["keyfile"]["error"]));
+            }
+        }
+        
+        $params['_files'] = $_FILES;
+        
+        $rest = new XervRest($live);
+        print $rest->installer($params);
+    });
     
+    $app->post('/install_agent_report', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        $site = get_site();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        if(array_key_exists('keyfile', $_FILES))
+        {
+            if($_FILES["keyfile"]["error"] > 0)
+            {
+                exit(error_json("SSH key file upload error: " . $_FILES["keyfile"]["error"]));
+            }
+        }
+        
+        $params['action'] = 'report';
+        $params['_files'] = $_FILES;
+        $rest = new XervRest($live);
+        print $rest->installer($params);
+    });
     
 	$app->get('/:method', function ($method) use ($app) {
 

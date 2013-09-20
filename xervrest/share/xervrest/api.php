@@ -461,9 +461,9 @@
         
         public function add_contact($params)
         {
-            $params = $this->_param_defaults($params, Array('alias' => $params['contact_name'], 'contactgroups' => false, 'pager' => false, 'only_services' => false, 'parameters' => false ));
-            
-            $missing_params = $this->_check_params($params, Array('contact_name'));
+            #$params = $this->_param_defaults($params, Array('notification_period' => $params['host_notifications_period'], 'alias' => $params['contact_name'], 'pager' => false, 'only_services' => false, 'parameters' => false ));
+            $params = $this->_param_defaults($params, Array('timeperiod' => $params['host_notifications_period'] , 'host_events' => $params['host_notification_options'], 'service_events' => $params['service_notification_options'],  'notification_period' => $params['host_notifications_period'], 'alias' => $params['contact_name'], 'pager' => false, 'only_services' => false, 'parameters' => false ));
+            $missing_params = $this->_check_params($params, Array('contact_name', 'contactgroups'));
             
             if(count($missing_params) > 0)
             {
@@ -643,7 +643,7 @@
             }
             fclose($fh);
             
-            $data = preg_replace("/^.*?\(.*?\((.*?)\).*/", '$1', $data);
+            $data = preg_replace("/^.*?\(.*?\(\"(.*?)\)\).*/", '$1', $data);
             $arr = explode(',', $data);
             
             return Array('proc' => str_replace('"', '', $arr[0]), 'user' => $arr[1], 
@@ -731,6 +731,169 @@
             }
 
             return response_json('success', 'The request has been executed.');
+        }
+
+        public function del_check_template($params)
+        {
+            $site = get_site();
+            $json_file = "/omd/sites/$site/etc/xervrest/check_templates.json";
+            $json_string = file_get_contents($json_file);
+            $missing_params = $this->_check_params($params, Array('name'));
+
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+
+            $name = $params['name'];
+
+            if($json_string === false)
+            {
+                return error_json("Could not open and read $json_file");
+            }
+
+            if($json_string !== '')
+            {
+                $template = json_decode($json_string, true);
+                if(array_key_exists($name, $template))
+                {
+                    unset($template[$name]);
+                }
+            }
+
+            $json_string = json_encode($template);
+
+            if($json_string === false)
+            {
+                return error_json("Error generating JSON.");
+            }
+
+            if(file_put_contents($json_file, $json_string) < 1)
+            {
+                return error_json("Could not write JSON to $json_file");
+            }
+
+            return response_json('success', 'The request has been executed.');
+        }
+
+        public function get_check_templates($params)
+        {
+            $site = get_site();
+            $json_file = "/omd/sites/$site/etc/xervrest/check_templates.json";
+            $json_string = file_get_contents($json_file);
+
+            if($json_string === false)
+            {
+                return error_json("Could not open and read $json_file");
+            }
+
+            if($json_string !== '')
+            {
+                return $json_string;
+            }
+            else
+            {
+                return error_json("Could not extract JSON string from $json_file");
+            }
+        }
+
+        public function add_check_template($params)
+        {
+            $site = get_site();
+            $json_file = "/omd/sites/$site/etc/xervrest/check_templates.json";
+            $json_string = file_get_contents($json_file);
+            $template = Array();
+            $missing_params = $this->_check_params($params, Array('name'));
+
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+
+            if($json_string === false)
+            {
+                return error_json("Could not open and read $json_file");
+            }
+
+            if($json_string !== '')
+            {
+                $template = json_decode($json_string, true);
+            }
+
+            $checks = Array();
+
+            foreach($params as $param => $value)
+            {
+                if(preg_match("/check\d+/", $param))
+                {
+                    array_push($checks, $value);
+                }
+            }
+
+            if(count($checks) < 1)
+            {
+                return error_json("No checks found.");
+            }
+
+            $template[$params['name']] = $checks;
+            $json_string = json_encode($template);
+            
+            if($json_string === false)
+            {
+                return error_json("Error generating JSON.");
+            }
+
+            if(file_put_contents($json_file, $json_string) < 1)
+            {
+                return error_json("Could not write JSON to $json_file");
+            }
+            
+            return response_json('success', 'The request has been executed.');
+        }
+        
+        public function installer($params)
+        {
+            $site = get_site();
+            $installer = "/omd/sites/$site/bin/install_omd_agent.py";
+            $config_file = "/omd/sites/$site/etc/xervrest/installer_config.json";
+            
+            $missing_params = $this->_check_params($params, Array('host', 'username'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $cmd = sprintf("/usr/bin/python %s --config %s --host %s --username %s", $installer, $config_file, $params['host'], $params['username']);
+            
+            if(array_key_exists('action', $params))
+            {
+                $cmd .= sprintf(" --action %s", $params['action']);
+            }
+            
+            if(array_key_exists('port', $params))
+            {
+                $cmd .= sprintf(" --port %s", $params['port']);
+            }
+            
+            if(array_key_exists('username', $params))
+            {
+                $cmd .= sprintf(" --username %s", $params['username']);
+            }
+
+            if(array_key_exists('password', $params))
+            {
+                $cmd .= sprintf(" --password %s", $params['password']);
+            }
+
+            if(array_key_exists('keyfile', $params['_files']))
+            {
+                $_tmp = sprintf("/omd/sites/$site/tmp/xervrest.%s.%s.%s.key", $site, $params['host'], $params['username']);
+                move_uploaded_file($_FILES["keyfile"]["tmp_name"], $_tmp);
+                $cmd .= sprintf(" --key %s", $_tmp);
+            }
+            
+            $output = shell_exec($cmd);
+            return $output;
         }
     }
 ?>
