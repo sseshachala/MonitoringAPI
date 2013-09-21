@@ -27,6 +27,13 @@ ln -s $INSTDIR/workspace/MonitoringAPI/xervrest/bin/install_omd_agent.py /omd/ve
 mkdir -p /omd/versions/default/skel/var/log/omd-agent-installer
 touch /omd/versions/default/skel/var/log/omd-agent-installer/omd-agent-installer.log
 
+# https://github.com/sseshachala/collectd_config
+git clone https://github.com/sseshachala/collectd_config
+cd collectd_config/installer
+
+# - any modifications to extra volumes or override etc., need to be modified in ./install.sh
+./install.sh graphite
+
 # Link graphios files
 ln -s $INSTDIR/workspace/MonitoringAPI/graphios/bin/graphios_site_migrate.py /omd/versions/default/bin/graphios_site_migrate.py
 ln -s $INSTDIR/workspace/MonitoringAPI/graphios/bin/graphios.py /omd/versions/default/bin/graphios.py
