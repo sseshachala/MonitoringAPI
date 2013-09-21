@@ -1,0 +1,49 @@
+apt-get update
+apt-get upgrade
+apt-get install apache2.2-common apache2 php-pear php5-sqlite php5-mcrypt php5-gd php5-cgi php5-cli mysql-server 
+apt-get install libsnmp-perl libreadline5 libperl5.14 libpango1.0-0 libxpm4 libjpeg8 libfontconfig1 patch python-ldap
+apt-get install libxmu6 libxaw7 libgvpr1 libgvc5 libgraph4 libcgraph5 libcdt4 libxt6 xvfb snmp smbclient pyro
+apt-get install dialog fping graphviz libapache2-mod-fcgid libapache2-mod-proxy-html libboost-program-options1.49.0 
+apt-get install libdbi1 libevent-1.4-2 libgd2-xpm libltdl7 libnet-snmp-perl git python-paramiko libapache2-mod-python
+
+#Mysql root password: mysqlroot
+
+export INSTDIR=/omd
+
+wget http://files.omdistro.org/releases/debian_ubuntu/omd-1.00_0.quantal_amd64.deb
+dpkg -i omd-1.00_0.quantal_amd64.deb
+mkdir $INSTDIR/workspace
+cd $INSTDIR/workspace
+
+# Right now this was done with my username/password. This will need to be changed as git will prompt for user/pass each time a pull is done.
+git clone https://github.com/sseshachala/MonitoringAPI.git
+chown -R $USER:omd *
+
+# Link xervrest
+ln -s $INSTDIR/workspace/MonitoringAPI/xervrest/share/xervrest /omd/versions/default/share/xervrest
+ln -s $INSTDIR/workspace/MonitoringAPI/xervrest/skel/etc/xervrest /omd/versions/default/skel/etc/xervrest
+ln -s $INSTDIR/workspace/MonitoringAPI/xervrest/skel/etc/apache/conf.d/0xervrest.conf /omd/versions/default/skel/etc/apache/conf.d/0xervrest.conf
+ln -s $INSTDIR/workspace/MonitoringAPI/xervrest/bin/install_omd_agent.py /omd/versions/default/bin/install_omd_agent.py
+mkdir -p /omd/versions/default/skel/var/log/omd-agent-installer
+touch /omd/versions/default/skel/var/log/omd-agent-installer/omd-agent-installer.log
+
+# Link graphios files
+ln -s $INSTDIR/workspace/MonitoringAPI/graphios/bin/graphios_site_migrate.py /omd/versions/default/bin/graphios_site_migrate.py
+ln -s $INSTDIR/workspace/MonitoringAPI/graphios/bin/graphios.py /omd/versions/default/bin/graphios.py
+ln -s $INSTDIR/workspace/MonitoringAPI/graphios/skel/etc/graphios /omd/versions/default/skel/etc/graphios
+ln -s $INSTDIR/workspace/MonitoringAPI/graphios/skel/etc/init.d/graphios /omd/versions/default/skel/etc/init.d/graphios
+cd /omd/versions/default/skel/etc/rc.d 
+ln -s ../init.d/graphios 98-graphios
+
+rm /omd/versions/default/share/omd/skel.permissions
+rm /omd/versions/default/skel/etc/pnp4nagios/process_perfdata.cfg
+rm /omd/versions/default/lib/pnp4nagios/process_perfdata.pl
+
+ln -s $INSTDIR/workspace/MonitoringAPI/graphios/share/omd/skel.permissions /omd/versions/default/share/omd/skel.permissions
+ln -s $INSTDIR/workspace/MonitoringAPI/graphios/skel/etc/pnp4nagios/process_perfdata.cfg /omd/versions/default/skel/etc/pnp4nagios/process_perfdata.cfg
+ln -s $INSTDIR/workspace/MonitoringAPI/graphios/lib/pnp4nagios/process_perfdata.pl /omd/versions/default/lib/pnp4nagios/process_perfdata.pl
+
+chmod a+x /omd/workspace/MonitoringAPI/graphios/skel/etc/init.d/graphios
+
+
+
