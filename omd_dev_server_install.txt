@@ -34,6 +34,15 @@ cd collectd_config/installer
 # - any modifications to extra volumes or override etc., need to be modified in ./install.sh
 ./install.sh graphite
 
+# configure graphite ip and port with graphios
+# Graphite server details are in /omd/sites/<sitename>/etc/graphios/graphios.ini
+
+# The two parameters are:
+
+# carbon_server=10.204.54.80
+carbon_port=2004
+
+
 # Link graphios files
 ln -s $INSTDIR/workspace/MonitoringAPI/graphios/bin/graphios_site_migrate.py /omd/versions/default/bin/graphios_site_migrate.py
 ln -s $INSTDIR/workspace/MonitoringAPI/graphios/bin/graphios.py /omd/versions/default/bin/graphios.py
