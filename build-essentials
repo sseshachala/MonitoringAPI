@@ -1,0 +1,15 @@
+apt-get install build-essential checkinstall
+
+sudo apt-get install build-essential checkinstall
+
+# And since you may want to get code from some projects with no released version, you should install appropriate version management software.
+
+sudo apt-get install cvs subversion git-core mercurial
+
+# You should then build a common directory for yourself where you'll be building these packages. We recommend creating /usr/local/src, but really you can put it anywhere you want. Make sure this directory is writable by your primary user account, by running
+
+sudo chown $USER /usr/local/src
+
+# and, just to be safe
+
+sudo chmod u+rwx /usr/local/src
