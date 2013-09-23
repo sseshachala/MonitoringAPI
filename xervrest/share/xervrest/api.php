@@ -96,121 +96,69 @@
 
     class XervRest
     {
-        public $implemented = Array(
-            'hosts' => Array('verb' => 'GET', 'params' => false),
-            'services' => Array('verb' => 'GET', 'params' => false),
-            'hostgroups' => Array('verb' => 'GET', 'params' => false),
-            'servicegroups' => Array('verb' => 'GET', 'params' => false),
-            'contactgroups' => Array('verb' => 'GET', 'params' => false),
-            'servicesbygroup' => Array('verb' => 'GET', 'params' => false),
-            'servicesbyhostgroup' => Array('verb' => 'GET', 'params' => false),
-            'hostsbygroup' => Array('verb' => 'GET', 'params' => false),
-            'contacts' => Array('verb' => 'GET', 'params' => false),
-            'commands' => Array('verb' => 'GET', 'params' => false),
-            'timeperiods' => Array('verb' => 'GET', 'params' => false),
-            'downtimes' => Array('verb' => 'GET', 'params' => false),
-            'comments' => Array('verb' => 'GET', 'params' => false),
-            'log' => Array('verb' => 'GET', 'params' => false),
-            'status' => Array('verb' => 'GET', 'params' => false),
-            'columns' => Array('verb' => 'GET', 'params' => false),
-            'statehist' => Array('verb' => 'GET', 'params' => false),
-
-            'ack_host' => Array('verb' => 'COMMAND', 'params' => Array( 'host' => 0, 'message' => 1)),
-            'ack_service' => Array('verb' => 'COMMAND', 'params' => Array( 'service' => 0, 'message' => 1)),
-            'schedule_host_check' => Array('verb' => 'COMMAND', 'params' => Array( 'host' => 0, )),
-            'schedule_host_services_check' => Array('verb' => 'COMMAND', 'params' => Array( 'host' => 0, )),
-            'schedule_service_check' => Array('verb' => 'COMMAND', 'params' => Array( 'host' => 0, 'service' => 1)),
-            'delete_comment' => Array('verb' => 'COMMAND', 'params' => Array( 'comment_id' => 0, )),
-            'remove_host_acknowledgement' => Array('verb' => 'COMMAND', 'params' => Array( 'host' => 0, )),
+        public $dynamic_methods = Array(
+            'hosts' => true,
+            'services' => true,
+            'hostgroups' => true,
+            'servicegroups' => true,
+            'contactgroups' => true,
+            'servicesbygroup' => true,
+            'servicesbyhostgroup' => true,
+            'hostsbygroup' => true,
+            'contacts' => true,
+            'commands' => true,
+            'timeperiods' => true,
+            'downtimes' => true,
+            'comments' => true,
+            'log' => true,
+            'status' => true,
+            'columns' => true,
+            'statehist' => true,
         );
 
         private $livestatus_obj;
-        private $dynamic_methods = Array('hosts');
 
-        public function __call($method, $arguments)
+        private function _param_defaults($params, $defaults)
         {
-            if(array_key_exists($method, $this->implemented))
+            foreach($defaults as $key => $val)
             {
-                switch ($this->implemented[$method]['verb'])
+                if(!array_key_exists($key, $params))
                 {
-                    case 'GET':
-                        array_unshift($arguments, $method);
-                        return call_user_func_array(array($this, 'do_get'), $arguments);
-                        break;
+                    $params[$key] = $val; 
                 }
             }
-
+            
+            return $params;
+        }
+        
+        private function _check_params($params, $mandatory)
+        {
+            $missing = Array();
+            foreach($mandatory as $key)
+            {
+                if(!array_key_exists($key, $params))
+                {
+                    array_push($missing, $key);
+                }
+            }
+            return $missing;
+        }
+        
+        public function __call($method, $arguments)
+        {
+            array_unshift($arguments, $method);
+            if(array_key_exists($method, $this->dynamic_methods))
+            {
+                return call_user_func_array(array($this, 'do_get'), $arguments);
+            }
+            
+            return error_json("$method is not supported.");
+            
         }
 
         public function XervRest($livestatus_obj)
         {
             $this->livestatus_obj = $livestatus_obj;
-        }
-
-        public function handle_get_params($params)
-        {
-            $filters = Array();
-            $limit = 0;
-            $offset = 0;
-            $columns = Array();
-
-            foreach($params as $param => $value)
-            {
-                if(preg_match("/filter\d+/", $param))
-                {
-                    $o = preg_replace("/filter([0-9]+)/", '\1', $param);
-                    $filters[$o] = $value;
-                }
-                elseif($param == "columns")
-                {
-                    $columns = explode(',',$value);
-                }
-                elseif($param == "limit")
-                {
-                    $limit = $value;
-                }
-                elseif($param == "offset")
-                {
-                    $offset = $value;
-                }
-            }
-            return(Array($columns,$filters,$limit,$offset));
-        }
-
-        public function handle_command_params($method, $params)
-        {
-            $p = Array();
-            foreach($params as $param => $value)
-            {
-                if(array_key_exists($param, $this->implemented[$method]['params']))
-                {
-                    $p[$this->implemented[$method]['params'][$param]] = $value;
-                }
-            }
-            return($p);
-        }
-
-        public function handle_params($method, $params)
-        {
-            if(!$params)
-            {
-                return(Array(false,false,false,false));
-            }
-
-            if( $this->implemented[$method]['verb'] == 'GET' )
-            {
-                return $this->handle_get_params($params);
-            }
-            
-            if( $this->implemented[$method]['verb'] == 'COMMAND' )
-            {
-                return $this->handle_command_params($method, $params);
-            }
-
-            if( $this->implemented[$method]['verb'] == 'CHECKMK' )
-            {
-                return $this->handle_command_params($method, $params);
-            }
         }
 
         public function paginate($results, $limit, $offset=0)
@@ -280,60 +228,133 @@
             return response_json('success', 'The request has been executed.');
         }
 
-        public function ack_host($host, $message)
+        public function ack_host($params)
         {
+            $missing_params = $this->_check_params($params, Array('host', 'message'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $host = $params['host'];
+            $message = $params['message'];
+            
             $cmd = "ACKNOWLEDGE_HOST_PROBLEM;$host;0;0;0;nagiosadmin;$message";
             return $this->do_command($cmd);
         }
 
-        public function ack_hosts($hosts, $message)
+        public function ack_hosts($params)
         {
+            $missing_params = $this->_check_params($params, Array('hosts', 'message'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $params['hosts'] = preg_replace('/,$/', '', $params['hosts']);
+            $hosts = explode(',', $params['hosts']);
+            $message = $params['message'];
+            
             foreach ($hosts as $host)
             {
                 $this->do_command("ACKNOWLEDGE_HOST_PROBLEM;$host;0;0;0;nagiosadmin;$message");
             }
         }
 
-        public function ack_service($service, $message)
+        public function ack_service($params)
         {
+            $missing_params = $this->_check_params($params, Array('service', 'message'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $service = $params['service'];
+            $message = $params['message'];
             $cmd = "ACKNOWLEDGE_SVC_PROBLEM;$service;0;0;0;nagiosadmin;$message";
             return $this->do_command($cmd);
         }
 
-        public function ack_services($services, $message)
+        public function ack_services($params)
         {
+            $missing_params = $this->_check_params($params, Array('services', 'message'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $params['services'] = preg_replace('/,$/', '', $params['services']);
+            $services = explode(',', $params['services']);
+            $message = $params['message'];
+            
             foreach ($services as $service)
             {
                 $this->do_command("ACKNOWLEDGE_SVC_PROBLEM;$service;0;0;0;nagiosadmin;$message");
             }
         }
 
-        public function schedule_host_check($host)
+        public function schedule_host_check($params)
         {
+            $missing_params = $this->_check_params($params, Array('host'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $host = $params['host'];
             $cmd = "SCHEDULE_FORCED_HOST_CHECK;$host;" . date('U');
             return $this->do_command($cmd);
         }
 
-        public function schedule_host_services_check($host)
+        public function schedule_host_services_check($params)
         {
+            $missing_params = $this->_check_params($params, Array('host'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $host = $params['host'];
             $cmd = "SCHEDULE_FORCED_HOST_SVC_CHECKS;$host;" . date('U');
             return $this->do_command($cmd);
         }
 
-        public function schedule_service_check($host, $service)
+        public function schedule_service_check($params)
         {
+            $missing_params = $this->_check_params($params, Array('host', 'service'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $host = $params['host'];
+            $service = $params['service'];
             $cmd = "SCHEDULE_FORCED_SVC_CHECK;$host;$service;" . date('U');
             return $this->do_command($cmd);
         }
 
-        public function delete_comment($comment_id)
+        public function delete_comment($params)
         {
+            $missing_params = $this->_check_params($params, Array('comment_id'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $comment_id = $params['comment_id'];
             $cmd = "DEL_HOST_COMMENT;$comment_id";
             return $this->do_command($cmd);
         }
 
-        public function remove_host_acknowledgement($host)
+        public function remove_host_acknowledgement($params)
         {
+            $missing_params = $this->_check_params($params, Array('host'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $host = $params['host'];
             $cmd = "REMOVE_HOST_ACKNOWLEDGEMENT;$host";
             return $this->do_command($cmd);
         }
@@ -353,9 +374,17 @@
             return $tmp;
         }
 
-        public function getprocess($host, $proc=false)
+        public function getprocess($params)
         {
+            $missing_params = $this->_check_params($params, Array('host'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $host = $params['host'];
             $site = get_site();
+            
             try {
                 $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
                 $cmk->execute($host);
@@ -364,8 +393,9 @@
                 return error_json( $e->getMessage() );
             }
 
-            if($proc)
+            if(array_key_exists('proc', $params))
             {
+                $proc = $params['proc'];
                 $ps = preg_grep("/$proc/i", $ps);
             }
 
@@ -385,32 +415,6 @@
             }
 
             return response_json('success', 'The request has been executed.');
-        }
-        
-        private function _param_defaults($params, $defaults)
-        {
-            foreach($defaults as $key => $val)
-            {
-                if(!array_key_exists($key, $params))
-                {
-                    $params[$key] = $val; 
-                }
-            }
-            
-            return $params;
-        }
-        
-        private function _check_params($params, $mandatory)
-        {
-            $missing = Array();
-            foreach($mandatory as $key)
-            {
-                if(!array_key_exists($key, $params))
-                {
-                    array_push($missing, $key);
-                }
-            }
-            return $missing;
         }
         
         private function _get_contact_group_members($contactgroup_name)

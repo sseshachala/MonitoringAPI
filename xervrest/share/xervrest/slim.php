@@ -274,6 +274,105 @@
         print $rest->installer($params);
     });
     
+    $app->get('/ack_host', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+
+        $rest = new XervRest($live);
+        #print_r($params);
+        print $rest->ack_host($params);
+    });
+    
+    $app->get('/ack_service', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+
+        $rest = new XervRest($live);
+        print $rest->ack_service($params);
+    });
+    
+    $app->get('/schedule_host_check', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+
+        $rest = new XervRest($live);
+        print $rest->schedule_host_check($params);
+    });
+
+    $app->get('/schedule_host_services_check', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+
+        $rest = new XervRest($live);
+        print $rest->schedule_host_services_check($params);
+    });
+    
+    $app->get('/schedule_service_check', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+
+        $rest = new XervRest($live);
+        print $rest->schedule_service_check($params);
+    });
+    
+    $app->get('/delete_comment', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+
+        $rest = new XervRest($live);
+        print $rest->delete_comment($params);
+    });
+    
+    $app->get('/remove_host_acknowledgement', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+
+        $rest = new XervRest($live);
+        print $rest->remove_host_acknowledgement($params);
+    });
+    
 	$app->get('/:method', function ($method) use ($app) {
 
 		$app->contentType('application/json');
@@ -286,12 +385,6 @@
         
         $rest = new XervRest($live);
         $params = $app->request->params();
-        
-        if($params)
-        {
-            $params = $rest->handle_params($method, $params);
-        }
-
         $rest_call = Array($rest,$method);
         print call_user_func_array($rest_call, $params);
 	});
