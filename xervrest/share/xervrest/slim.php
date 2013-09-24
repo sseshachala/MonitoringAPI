@@ -386,7 +386,7 @@
         $rest = new XervRest($live);
         $params = $app->request->params();
         $rest_call = Array($rest,$method);
-        print call_user_func_array($rest_call, $params);
+        print call_user_func($rest_call, $params);
 	});
 
 	$app->run();

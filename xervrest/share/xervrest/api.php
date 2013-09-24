@@ -181,8 +181,12 @@
             return str_replace('\/','/', json_encode($results_a));
         }
 
-        public function do_get($table, $columns=false, $filters=false, $limit=false, $offset=false)
+        public function do_get($table, $params)
         {
+            $columns = array_key_exists('columns', $params) ? $params['columns'] : false;
+            $limit = array_key_exists('limit', $params) ? $params['limit'] : false;
+            $offset = array_key_exists('offset', $params) ? $params['offset'] : false;
+            
             try {
                 $query = new LQL('GET');
             } catch(Exception $e) {
@@ -193,17 +197,18 @@
 
             if($columns)
             {
+                $columns = explode(',', $params['columns']);
                 $query->columns($columns);
             }
 
-            if($filters)
+            foreach($params as $key => $val)
             {
-                foreach($filters as $filter)
+                if(preg_match('/filter\d+/', $key))
                 {
-                    $query->filter($filter);
+                    $query->filter($val);
                 }
             }
-
+            
             $results = $this->livestatus_obj->query($query->as_string());
 
             if($limit > 0 || $offset > 0)
