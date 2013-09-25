@@ -160,12 +160,6 @@
     $app->get('/getprocess', function() use ($app) {
 		$app->contentType('application/json');
         $params = $app->request->params();
-        $proc = false;
-        
-        if(!array_key_exists('host', $params))
-        {
-            exit(error_json("Missing parameter: host"));
-        }
         
         try {
             $live = get_live_object();
@@ -173,13 +167,8 @@
             exit(error_json($e->getMessage()));
         }
         
-        if(array_key_exists('proc', $params))
-        {
-            $proc = $params['proc'];
-        }
-        
         $rest = new XervRest($live);
-        print $rest->getprocess($params['host'], $proc);
+        print $rest->getprocess($params);
     });
 
     $app->get('/add_check_template', function() use ($app) {
