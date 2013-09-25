@@ -205,6 +205,8 @@
             {
                 if(preg_match('/filter\d+/', $key))
                 {
+                    $regex = "^(.*?)(=|~|=~|~~|<|>|<=|>=|!=|!~|!=~|!~~)(.*?)$";
+                    $val = preg_replace("/$regex/", '$1 $2 $3', $val);
                     $query->filter($val);
                 }
             }
