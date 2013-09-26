@@ -142,11 +142,6 @@
 		$app->contentType('application/json');
         $params = $app->request->params();
         
-        if(!array_key_exists('host', $params))
-        {
-            exit(error_json("Missing parameter: host"));
-        }
-        
         try {
             $live = get_live_object();
         } catch(Exception $e) {
@@ -154,7 +149,7 @@
         }
         
         $rest = new XervRest($live);
-        print $rest->host_proc_checks($params['host']);
+        print $rest->host_proc_checks($params);
     });
 
     $app->get('/getprocess', function() use ($app) {
@@ -360,6 +355,20 @@
 
         $rest = new XervRest($live);
         print $rest->remove_host_acknowledgement($params);
+    });
+    
+    $app->get('/host_proc_checks', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+
+        $rest = new XervRest($live);
+        print $rest->host_proc_checks($params);
     });
     
 	$app->get('/:method', function ($method) use ($app) {

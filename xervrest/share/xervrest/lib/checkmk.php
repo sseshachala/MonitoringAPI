@@ -224,7 +224,7 @@ class CheckMk
 
     public function restart($site)
     {
-        $this->cmk_cmd($site, ' -R');
+        return $this->cmk_cmd($site, ' -R');
     }
 
     public function auto_inventory($site, $host=false)

@@ -416,19 +416,19 @@
             $site = get_site();
             try {
                 $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
-                $cmk->restart($site);
+                $res = $cmk->restart($site);
             } catch(Exception $e) {
-                return error_json( $e->getMessage() );
+                return error_json( $e->getMessage() . " Output: $res");
             }
 
-            return response_json('success', 'The request has been executed.');
+            return response_json('success', sprintf('The request has been executed. Command output: %s', $res));
         }
         
         private function _get_contact_group_members($contactgroup_name)
         {
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $cfg_file = sprintf("%s/xervrest_contactgroup_%s_%s.mk", $cfg_root, $site, $contactgroup_name);
+            $cfg_file = sprintf("%s/xervrest_contactgroup.%s.%s.mk", $cfg_root, $site, $contactgroup_name);
             $data = file($cfg_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
             
             if(!$data)
@@ -452,11 +452,11 @@
         {
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $raw_files = glob("$cfg_root/xervrest_contactgroup_*.mk");
+            $raw_files = glob("$cfg_root/xervrest_contactgroup.*.mk");
             
             foreach($raw_files as $file)
             {
-                $contactgroup_name = preg_replace("/.*xervrest_contactgroup.*?_.*?_(.*?)\.mk/", '$1', $file);
+                $contactgroup_name = preg_replace("/.*xervrest_contactgroup.*?\..*?\.(.*?)\.mk/", '$1', $file);
                 $members = $this->_get_contact_group_members($contactgroup_name);
                 
                 foreach($members as $member)
@@ -472,18 +472,25 @@
         
         public function add_contact($params)
         {
-            #$params = $this->_param_defaults($params, Array('notification_period' => $params['host_notifications_period'], 'alias' => $params['contact_name'], 'pager' => false, 'only_services' => false, 'parameters' => false ));
-            $params = $this->_param_defaults($params, Array('timeperiod' => $params['host_notifications_period'] , 'host_events' => $params['host_notification_options'], 'service_events' => $params['service_notification_options'],  'notification_period' => $params['host_notifications_period'], 'alias' => $params['contact_name'], 'pager' => false, 'only_services' => false, 'parameters' => false ));
-            $missing_params = $this->_check_params($params, Array('contact_name', 'contactgroups'));
+            $params = $this->_param_defaults($params, Array('timeperiod' => $params['host_notification_period'] , 'host_events' => $params['host_notification_options'], 'service_events' => $params['service_notification_options'],  'notification_period' => $params['host_notification_period'], 'alias' => $params['contact_name'], 'pager' => false, 'only_services' => false, 'parameters' => false ));
+            $mandatory_params = Array('contact_name', 'contactgroups', 'host_notification_commands', 
+                'host_notification_options', 'notification_period', 'service_notification_commands', 'service_notification_options', 
+                'host_events', 'only_services', 'parameters', 'service_events', 'timeperiod');
+            $missing_params = $this->_check_params($params, $mandatory_params);
             
             if(count($missing_params) > 0)
             {
                 return error_json("Missing parameters: " . implode(' ', $missing_params));
             }
             
+            if(preg_match("/\./", $params['contact_name']))
+            {
+                return error_json("Contact name may not contain a dot/period: . ");
+            }
+            
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $cfg_file = sprintf("%s/xervrest_contact_%s_%s.mk", $cfg_root, $site, $params['contact_name']);
+            $cfg_file = sprintf("%s/xervrest_contact.%s.%s.mk", $cfg_root, $site, $params['contact_name']);
 
             try {
                 $cfg = new CheckMkCfg($cfg_file);
@@ -506,7 +513,7 @@
             
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $cfg_file = sprintf("%s/xervrest_contact_%s_%s.mk", $cfg_root, $site, $params['contact_name']);
+            $cfg_file = sprintf("%s/xervrest_contact.%s.%s.mk", $cfg_root, $site, $params['contact_name']);
             
             if(!file_exists($cfg_file))
             {
@@ -549,9 +556,14 @@
 
             $params = $this->_param_defaults($params, Array('alias' => $params['contactgroup_name']));
             
+            if(preg_match("/\./", $params['contactgroup_name']))
+            {
+                return error_json("Contact group name may not contain a dot/period: . ");
+            }
+            
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $cfg_file = sprintf("%s/xervrest_contactgroup_%s_%s.mk", $cfg_root, $site, $params['contactgroup_name']);
+            $cfg_file = sprintf("%s/xervrest_contactgroup.%s.%s.mk", $cfg_root, $site, $params['contactgroup_name']);
 
             try {
                 $cfg = new CheckMkCfg($cfg_file);
@@ -574,7 +586,7 @@
             
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $cfg_file = sprintf("%s/xervrest_contactgroup_%s_%s.mk", $cfg_root, $site, $params['contactgroup_name']);
+            $cfg_file = sprintf("%s/xervrest_contactgroup.%s.%s.mk", $cfg_root, $site, $params['contactgroup_name']);
 
             try 
             {
@@ -598,10 +610,16 @@
         {
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $cfg_file = sprintf("%s/xervrest_ps_%s_%s.mk", $cfg_root, $params['host'], $params['cname']);
+            $cfg_file = sprintf("%s/xervrest_ps.%s.%s.mk", $cfg_root, $params['host'], $params['cname']);
 
             $defaults = Array('user' => false, 'warnmin' => 1, 'okmin' => 1, 'okmax' => 1, 'warnmax' => 1);
             $params = $this->_param_defaults($params, $defaults);
+
+            if(preg_match("/\./", $params['cname']))
+            {
+                return error_json("Check cname may not contain a dot/period: . ");
+            }
+
 
             try {
                 $cfg = new CheckMkCfg($cfg_file);
@@ -624,7 +642,7 @@
         
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $cfg_file = sprintf("%s/xervrest_ps_%s_%s.mk", $cfg_root, $params['host'], $params['cname']);
+            $cfg_file = sprintf("%s/xervrest_ps.%s.%s.mk", $cfg_root, $params['host'], $params['cname']);
 
             try 
             {
@@ -661,16 +679,24 @@
                          'warnmin' => $arr[2], 'okmin' => $arr[3], 'okmax' => $arr[4], 'warnmax' => $arr[5]);
         }
 
-        public function host_proc_checks($host)
+        public function host_proc_checks($params)
         {
             $site = get_site();
+            $missing_params = $this->_check_params($params, Array('host'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $host = $params['host'];
+            
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $raw_files = glob("$cfg_root/xervrest_ps_$host*.mk");
+            $raw_files = glob("$cfg_root/xervrest_ps.$host*.mk");
             $check_data = Array();
             
             foreach($raw_files as $file)
             {
-                $cname = preg_replace("/.*xervrest_ps_(.*?)_(.*?)\.mk/", '$2', $file);
+                $cname = preg_replace("/.*xervrest_ps\.(.*?)\.(.*?)\.mk/", '$2', $file);
                 $check_data[$cname] = $this->_get_check_data($file);
             }
 
