@@ -25,13 +25,13 @@ start () {
 
 stop () {
         echo -n "Stopping graphios..."
-        if [ -a cat ###ROOT###/tmp/graphios.pid ]
+        if [ -e ###ROOT###/tmp/graphios.pid ]
         then
             kill `cat ###ROOT###/tmp/graphios.pid`
             RETVAL=$?
             if [ $RETVAL -eq 0 ]
             then
-                if [ -a ###ROOT###/tmp/graphios.pid ]
+                if [ -e ###ROOT###/tmp/graphios.pid ]
                 then
                     rm ###ROOT###/tmp/graphios.pid
                 fi
