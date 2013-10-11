@@ -606,6 +606,24 @@
             return response_json('success', 'The request has been executed.');
         }
 
+        public function add_check($params)
+        {
+            $site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $cfg_file = sprintf("%s/xervrest.%s.%s.mk", $cfg_root, $params['host'], $params['check']);
+
+            $defaults = Array();
+            $rest_params = $this->_param_defaults($params, $defaults);
+
+            try {
+                $cfg = new CheckMkCfg($cfg_file);
+                $cfg->add_check($params['check'], $params['host'], $params['cname'], $params_str=$params['params']);
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+
+            return response_json('success', 'The request has been executed.');
+        }
         public function add_proc_check($params)
         {
             $site = get_site();
@@ -627,6 +645,36 @@
                                     $params['warnmin'], $params['okmin'], $params['okmax'], $params['warnmax']);
             } catch(Exception $e) {
                 return error_json( $e->getMessage() );
+            }
+
+            return response_json('success', 'The request has been executed.');
+        }
+
+        public function del_check($params)
+        {
+            $missing_params = $this->_check_params($params, Array('host', 'cname'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+        
+            $site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $cfg_file = sprintf("%s/xervrest.%s.%s.mk", $cfg_root, $params['host'], $params['cname']);
+
+            try 
+            {
+                if(unlink($cfg_file) == FALSE)
+                {
+                    return error_json("Could not remove file $cfg_file");
+                }
+
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $cmk->cmk_cmd($site, " -R");
+            } 
+            catch(Exception $exc)
+            {
+                return error_json( $exc->getMessage() );
             }
 
             return response_json('success', 'The request has been executed.');

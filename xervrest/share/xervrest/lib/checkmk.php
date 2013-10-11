@@ -9,11 +9,26 @@ class CheckMkCfg
         $this->cfg_file = $cfg_file;
     }
 
-    public function add_ps_check($host, $cname, $proc, $user=false, $warnmin=1, $okmin=1, $okmax=1, $warnmax=1)
+    public function add_check($check, $host, $citem=null, $params=null, $params_str=null)
     {
         $fh = fopen($this->cfg_file, 'w');
         $user = ($user) ? "\"$user\"" : 'ANY_USER';
-        $cfg_s = sprintf('checks += [("%s", "ps", "%s", ("%s", %s, %s, %s, %s, %s)),]', $host, $cname, $proc, $user, $warnmin, $okmin, $okmax, $warnmax);
+	if ($citem == null) {
+		$citem_str = 'None';
+	} else {
+		$citem_str = sprintf('"%s"', citem);
+	}
+	if ($params_str == null) {
+		if ($params == null){
+			$params_str = 'None';
+		} else {
+			$params_str = '(';
+			$params_str += implode(", ", $params);
+			$params_str += ')';
+
+		}
+	}
+        $cfg_s = sprintf('checks += [(["%s"], "%s", %s, %s),]', $host, $check, $citem_str, $params_str);
 
         if(!$fh)
         {
@@ -26,6 +41,10 @@ class CheckMkCfg
         }
 
         fclose($fh);
+    }
+    public function add_ps_check($host, $cname, $proc, $user=false, $warnmin=1, $okmin=1, $okmax=1, $warnmax=1) {
+	    $user = ($user) ? "\"$user\"" : 'ANY_USER';
+	    $this->add_check("ps", $host, $cname, $params=[$proc, $user, $warnmin, $okmin, $okmax, $warnmax])
     }
     
     public function add_contact($params)
