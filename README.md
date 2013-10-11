@@ -83,7 +83,7 @@ Process Methods
 ---------------
 
 Add a check:
-http://<server>/<site>/xervrest/add_proc_check?host=<host>&check=<name of check>&</name>cname=<citem for check>&params_str=<params for check>
+http://<server>/<site>/xervrest/add_check?host=<host>&check=<name of check>&</name>cname=<citem for check>&params_str=<params for check>
 
 Required: check, host
 
