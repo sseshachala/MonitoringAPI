@@ -91,6 +91,19 @@
         print $rest->del_contact_group($params);
     });
     
+    $app->get('/add_check', function() use ($app) {
+		$app->contentType('application/json');
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        $params = $app->request->params();
+        print $rest->add_check($params);
+    });
     $app->get('/add_proc_check', function() use ($app) {
 		$app->contentType('application/json');
         

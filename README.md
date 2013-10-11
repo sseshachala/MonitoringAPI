@@ -82,6 +82,22 @@ http://<server>/<site>/xervrest/remove_host_acknowledgement?host=<hostname>
 Process Methods
 ---------------
 
+Add a check:
+http://<server>/<site>/xervrest/add_proc_check?host=<host>&check=<name of check>&</name>cname=<citem for check>&params_str=<params for check>
+
+Required: check, host
+
+Dont use parameters and cname if they are not required for check
+
+host = host name as in check_mk
+
+cname = a check item
+
+params_str = Paramters for the check as a python tuple.
+
+More info: http://mathias-kettner.de/checkmk_configvars.html
+
+
 Added a process check:
 http://<server>/<site>/xervrest/add_proc_check?host=<host>&cname=<unique name>&proc=/usr/bin/myproc&user=<user>&warnmin=<n>&okmin=<n>&okmax=<n>&warnmax=<n>
 
@@ -117,7 +133,10 @@ The API call above would add check called "webserver" for server01.example.com f
 
 The check would cause WARNING if there was only 1 single apache process and a WARNING if there were up to 13 processes. Anything between 3 and 10 would be OK.
 
-Delete a check:
+Delete a check proc:
+http://<server>/<site>/xervrest/del_check?host=<host>&check=<unique name>
+
+Delete a check proc:
 http://<server>/<site>/xervrest/del_proc_check?host=<host>&cname=<unique name>
 
 List of xervrest checks added:

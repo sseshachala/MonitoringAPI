@@ -12,7 +12,6 @@ class CheckMkCfg
     public function add_check($check, $host, $citem=null, $params=null, $params_str=null)
     {
         $fh = fopen($this->cfg_file, 'w');
-        $user = ($user) ? "\"$user\"" : 'ANY_USER';
 	if ($citem == null) {
 		$citem_str = 'None';
 	} else {
@@ -44,7 +43,7 @@ class CheckMkCfg
     }
     public function add_ps_check($host, $cname, $proc, $user=false, $warnmin=1, $okmin=1, $okmax=1, $warnmax=1) {
 	    $user = ($user) ? "\"$user\"" : 'ANY_USER';
-	    $this->add_check("ps", $host, $cname, $params=[$proc, $user, $warnmin, $okmin, $okmax, $warnmax])
+	    $this->add_check("ps", $host, $cname, $params=[$proc, $user, $warnmin, $okmin, $okmax, $warnmax]);
     }
     
     public function add_contact($params)
