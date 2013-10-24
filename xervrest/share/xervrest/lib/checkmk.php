@@ -9,6 +9,45 @@ class CheckMkCfg
         $this->cfg_file = $cfg_file;
     }
 
+    public function add_hosts($params)
+    {
+        $hosts = Array();
+        foreach($params as $param => $value)
+        {
+            if(preg_match('/^(.*?)_(\d+)/', $param, $m))
+            {
+                $hosts[$m[2]][$m[1]] = $value;
+            }
+        }
+
+        $orig_cfg = $this->cfg_file;
+        foreach($hosts as $host)
+        {
+            $this->cfg_file = sprintf('%s%s.mk', $orig_cfg, $host['ip']);
+            $this->add_host($host);
+        }
+    }
+
+    public function add_host($params)
+    {
+        $fh = fopen($this->cfg_file, 'w');
+
+        if(!$fh)
+        {
+            throw Exception("Could not open file for writing: " . $this->cfg_file);
+        }
+
+        $cfg = sprintf("all_hosts += [ \"%s|xervrest|/\" + FOLDER_PATH + \"/\"]\n", $params['hostname']);
+        $cfg .= sprintf("ipaddresses.update({'tmptestsrv': u'%s'})", $params['ip']);
+
+        if(fwrite($fh, $cfg) == FALSE)
+        {
+            throw Exception("Could not write to file: " . $this->cfg_file);
+        }
+
+        fclose($fh);
+    }
+
     public function add_ps_check($host, $cname, $proc, $user=false, $warnmin=1, $okmin=1, $okmax=1, $warnmax=1)
     {
         $fh = fopen($this->cfg_file, 'w');

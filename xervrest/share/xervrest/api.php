@@ -932,5 +932,21 @@
             $output = shell_exec($cmd);
             return $output;
         }
+
+        public function add_hosts($params)
+        {
+            $site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $cfg_file = sprintf("%s/xervrest_host_");
+
+            try {
+                $cfg = new CheckMkCfg($cfg_file);
+                $cfg->add_hosts($params);
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+
+            return response_json('success', 'The request has been executed.');
+        }
     }
 ?>
