@@ -272,11 +272,14 @@ def get_check_config(host, check):
     return check_file
 
 
-@app.route('/enable_host')
+@app.route('/enable_host', methods=["POST"])
 def enable_host():
     data = request.json
+    if data is None:
+        return failed_response("No json data supplied")
     for key in ('host', 'name'):
-        if key is None:
+        val = data.get(key)
+        if val is None:
             return failed_response("No %s in request json" % key)
     host = data.get('host')
     name = data.get('name')
@@ -289,11 +292,13 @@ def enable_host():
     return response_data(host=host, name=name)
 
 
-@app.route('/disable_host')
+@app.route('/disable_host', methods=["POST"])
 def disable_host():
-    host = request.json('host')
+    if request.json is None:
+        return failed_response("No json data supplied")
+    host = request.json.get('host')
     if host is None:
-        return failed_response("No host in request json")
+        return failed_response("No host in request json" )
     config = get_host_config(host)
     if not os.path.exists(config):
         return failed_response("Host %s does not exist" % host)
