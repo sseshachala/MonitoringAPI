@@ -937,7 +937,7 @@
         {
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $cfg_file = sprintf("%s/xervrest_host_");
+            $cfg_file = sprintf("%s/xervrest_host_", $cfg_root);
 
             try {
                 $cfg = new CheckMkCfg($cfg_file);
