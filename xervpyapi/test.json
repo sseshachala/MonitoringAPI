@@ -1,0 +1,32 @@
+{
+    "plans": [
+        {
+            "name": "Professional",
+            "include_plans": [
+                "Basic"
+                ],
+            "checks": [
+                "netstat",
+                "uname"
+
+                ],
+            "active": true
+        },
+        {
+            "name": "Basic",
+            "include_plans": [
+                ],
+            "checks": [
+                "cpu"
+                ],
+            "active": true
+        },
+        {
+            "name": "Old",
+            "checks": [
+                ],
+            "active": false
+        }
+    ]
+}
+
