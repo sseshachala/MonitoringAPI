@@ -941,7 +941,15 @@
 
             try {
                 $cfg = new CheckMkCfg($cfg_file);
-                $cfg->add_hosts($params);
+                $all_hosts = $cfg->add_hosts($params);
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+
+            try {
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $cmk->cmk_cmd($site, " -I $all_hosts");
+                $cmk->cmk_cmd($site, " -R");
             } catch(Exception $e) {
                 return error_json( $e->getMessage() );
             }

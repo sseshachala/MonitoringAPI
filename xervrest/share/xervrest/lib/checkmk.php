@@ -20,12 +20,16 @@ class CheckMkCfg
             }
         }
 
+        $host_list = '';
         $orig_cfg = $this->cfg_file;
         foreach($hosts as $host)
         {
+            $host_list .= sprintf(" %s", $host['ip']);
             $this->cfg_file = sprintf('%s%s.mk', $orig_cfg, $host['ip']);
             $this->add_host($host);
         }
+
+        return $host_list;
     }
 
     public function add_host($params)
