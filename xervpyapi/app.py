@@ -80,6 +80,12 @@ def requires_auth(f):
 
 #### Plan methods ####
 
+
+def copy_plans():
+    with open(TEST_JSON) as fp:
+        data = json.load(fp)
+    return data['plans']
+
 def load_plans():
     with open(TEST_JSON) as fp:
         data = json.load(fp)
@@ -88,7 +94,8 @@ def load_plans():
         if not plan['active']:
             continue
         checks = set(plan['checks'])
-        plans[plan['name']] = checks
+        name = plan['name'].lower()
+        plans[name] = checks
     for plan in data['plans']:
         if not plan['active']:
             continue
@@ -101,13 +108,33 @@ def load_plans():
                 incl_checks = plans[include]
             except KeyError:
                 continue
-            name = plan['name']
+            name = plan['name'].lower()
             plans[name] = plans[name].union(incl_checks)
+        exclude_checks = plan.get('exclude_checks', [])
+        for ex_check in exclude_checks:
+            try:
+                plans[name].remove(ex_check)
+            except KeyError:
+                pass
     return plans
 
 
 def update_plans(plan):
-    pass
+    for key in ('checks', 'name', 'active'):
+        if key not in plan:
+            return False, "No %s in plan" % key
+    with open(TEST_JSON) as fp:
+        data = json.load(fp)
+    for exist_plan in data['plans']:
+        if plan['name'] == exist_plan['name']:
+            data['plans'].remove(exist_plan)
+
+    data['plans'].append(plan)
+    with open(TEST_JSON, 'w') as fp:
+        json.dump(data, fp)
+        return True, None
+
+    return False, None
 
 
 #### END PLAN METHODS ####
@@ -166,27 +193,116 @@ def get_template(template):
         return failed_response("No such plan %s" % template)
     return response_data(plan=plan, name=template)
 
+
 @app.route('/add_template', methods=["POST"])
 def add_template():
-    print request.data
-    plan = {}
-    update_plans(plan)
+    plan = request.json
+    upd, msg= update_plans(plan)
+    if upd:
+        return response_data(name=plan['name'])
+    else:
+        return failed_response("Could not add plan. %s" % msg if msg is not
+                None else '')
+
+@app.route("/add_check/<plan>/<check>")
+def add_check(plan, check):
+    plan = plan.lower()
+    check = check.lower()
+    plans = copy_plans()
+    current_plan = None
+    for ex_plan in plans:
+        if ex_plan['name'].lower() == plan:
+            current_plan = ex_plan
+            break
+    else:
+        return failed_response("No plan %s" % plan)
+    if check in current_plan['checks']:
+        return failed_response("Check %s is already in plan %s" % (check,
+            plan))
+    current_plan['checks'].append(check)
+    upd, msg = update_plans(current_plan)
+    if upd:
+        return response_data(check=check, plan=plan)
+    else:
+        return failed_response(msg)
 
 
-@app.route('/add_host')
-def add_host():
-    pass
+@app.route("/delete_from/<plan>/<check>")
+def delete_check(plan, check):
+    plan = plan.lower()
+    check = check.lower()
+    plans = copy_plans()
+    current_plan = None
+    for ex_plan in plans:
+        if ex_plan['name'].lower() == plan:
+            current_plan = ex_plan
+            break
+    else:
+        return failed_response("No plan %s" % plan)
+    check_plans = load_plans()
+    if not check in check_plans[plan]:
+        return failed_response("Check %s is not in plan %s" % (check, plan))
+    if check in current_plan['checks']:
+        current_plan['checks'].remove(check)
+    else:
+        if not 'exclude_checks' in current_plan:
+            current_plan['exclude_checks'] = []
+        current_plan['exclude_checks'].append(check)
+    upd, msg = update_plans(current_plan)
+    if upd:
+        return response_data(check=check, plan=plan)
+    else:
+        return failed_response(msg)
+
+
+def get_check_dir():
+    config_dir = os.path.expanduser(app.config['XMD_CHECK_CONFIG_DIR'])
+    return config_dir
+
+
+def get_host_config(host):
+    config_dir = get_check_dir()
+    host_file = os.path.join(config_dir, app.config['XMD_HOST_CONFIG'].format(host=host))
+    return host_file
+
+
+def get_check_config(host, check):
+    config_dir = get_check_dir()
+    check_file = os.path.join(config_dir, app.config['XMD_CHECK_CONFIG'].format(check=check, host=host))
+    return check_file
 
 
 @app.route('/enable_host')
 def enable_host():
-    pass
+    data = request.json
+    for key in ('host', 'name'):
+        if key is None:
+            return failed_response("No %s in request json" % key)
+    host = data.get('host')
+    name = data.get('name')
+    config = get_host_config(host)
+    if os.path.exists(config):
+        return failed_response("Config already exists for host %s" % host)
+    with open(config, 'w') as fp:
+        fp.write('all_hosts += [ "%s"]\n' % name)
+        fp.write('ipdaresses.update({"%s": "%s"})\n' % (name, host))
+    return response_data(host=host, name=name)
 
 
-@app.route('/')
-def main():
-    return response_data({'data':'asg' })
+@app.route('/disable_host')
+def disable_host():
+    host = request.json('host')
+    if host is None:
+        return failed_response("No host in request json")
+    config = get_host_config(host)
+    if not os.path.exists(config):
+        return failed_response("Host %s does not exist" % host)
+    try:
+        os.remove(config)
+    except OSError:
+        return failed_response("Failed disabling host %s" % host)
+    return response_data(host=host)
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host=app.config['APP_HOST'], port=app.config['APP_PORT'])
