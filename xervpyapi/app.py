@@ -1,6 +1,8 @@
 import os
 import json
 from functools import wraps
+import shlex
+import subprocess
 
 from flask import Flask
 
@@ -272,6 +274,16 @@ def get_check_config(host, check):
     return check_file
 
 
+def run(command):
+    p = subprocess.Popen(shlex.split(command))
+    return
+
+def reload_cmk():
+    run("cmk -R")
+
+def inventory_host(host_name):
+    run("cmk -I @%s && cmk -R" % host_name)
+
 @app.route('/enable_host', methods=["POST"])
 def enable_host():
     data = request.json
@@ -289,6 +301,7 @@ def enable_host():
     with open(config, 'w') as fp:
         fp.write('all_hosts += [ "%s"]\n' % name)
         fp.write('ipaddresses.update({"%s": "%s"})\n' % (name, host))
+    inventory_host(name)
     return response_data(host=host, name=name)
 
 
@@ -306,6 +319,7 @@ def disable_host():
         os.remove(config)
     except OSError:
         return failed_response("Failed disabling host %s" % host)
+    reload_cmk()
     return response_data(host=host)
 
 
