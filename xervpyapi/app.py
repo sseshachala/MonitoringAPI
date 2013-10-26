@@ -288,7 +288,7 @@ def enable_host():
         return failed_response("Config already exists for host %s" % host)
     with open(config, 'w') as fp:
         fp.write('all_hosts += [ "%s"]\n' % name)
-        fp.write('ipdaresses.update({"%s": "%s"})\n' % (name, host))
+        fp.write('ipaddresses.update({"%s": "%s"})\n' % (name, host))
     return response_data(host=host, name=name)
 
 
