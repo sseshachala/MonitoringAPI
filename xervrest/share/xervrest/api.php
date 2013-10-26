@@ -956,5 +956,57 @@
 
             return response_json('success', 'The request has been executed.');
         }
+
+        public function del_hosts($params)
+        {
+            $site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $host_count = 0;
+            $del_count = 0;
+            $warnings = Array();
+
+            foreach($params as $param => $value)
+            {
+                if(preg_match('/^ip_(\d+)/', $param, $m))
+                {
+                    $host_count++;
+                    $cfg_file = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $value);
+                    if(file_exists($cfg_file))
+                    {
+                        if(unlink($cfg_file) == FALSE)
+                        {
+                            array_push($warnings, "unlink($cfg_file) returned FALSE");
+                        }
+                        else
+                        {
+                            $del_count++;
+                        }
+                    }
+                    else
+                    {
+                        array_push($warnings, "Could not find config file for " . $m[1]);
+                    }
+                }
+            }
+
+            try {
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $cmk->cmk_cmd($site, " -R");
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+
+            if($host_count != $del_count)
+            {
+                array_push($warnings, sprintf("%s/%s hosts deleted",$del_count,$host_count));
+            }
+
+            if(count($warnings) > 0)
+            {
+                return error_json("WARNINGS: " . implode("\n", $warnings));
+            }
+
+            return response_json('success', 'The request has been executed.');
+        }
     }
 ?>
