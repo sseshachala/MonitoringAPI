@@ -42,7 +42,7 @@ class CheckMkCfg
         }
 
         $cfg = sprintf("all_hosts += [ \"%s|xervrest|/\" + FOLDER_PATH + \"/\"]\n", $params['hostname']);
-        $cfg .= sprintf("ipaddresses.update({'tmptestsrv': u'%s'})", $params['ip']);
+        $cfg .= sprintf("ipaddresses.update({'%s': u'%s'})", $params['hostname'], $params['ip']);
 
         if(fwrite($fh, $cfg) == FALSE)
         {
