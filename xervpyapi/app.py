@@ -29,11 +29,7 @@ def make_json_app(import_name, **kwargs):
                                 else 500)
         return response
 
-    def make_json_response(response):
-        import ipdb; ipdb.set_trace()
-
     app = Flask(import_name, **kwargs)
-    app.after_this_request = make_json_response
     for code in default_exceptions.iterkeys():
         app.error_handler_spec[None][code] = make_json_error
 
@@ -47,6 +43,10 @@ TEST_JSON = os.path.join(PROJECT_PATH, 'test.json')
 
 app.config.from_object(__name__)
 app.config.from_pyfile(os.path.join(PROJECT_PATH, 'settings.py'))
+
+CONFIG_PATH = os.path.expanduser('~/etc/xervpyapi/xervpyapi.conf')
+if os.path.exists(CONFIG_PATH):
+    app.config.from_pyfile(CONFIG_PATH)
 
 
 
@@ -143,15 +143,15 @@ def update_plans(plan):
 
 
 
-def response_data(data={}, **kwargs):
-    if kwargs:
-        items = {}
-        for key, value in kwargs.items():
-            if isinstance(value, set):
-                items[key] = list(value)
-            else:
-                items[key] = value
-        data.update(items)
+def response_data(**kwargs):
+    items = {}
+    data = kwargs.get('data', {})
+    for key, value in kwargs.items():
+        if isinstance(value, set):
+            items[key] = list(value)
+        else:
+            items[key] = value
+    data.update(items)
     data['status'] = 'OK'
     print data
     resp = jsonify(data)
