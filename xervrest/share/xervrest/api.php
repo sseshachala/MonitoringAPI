@@ -946,15 +946,18 @@
                 return error_json( $e->getMessage() );
             }
 
+            $inv_retval = '';
+            $res_retval = '';
+
             try {
                 $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
-                $cmk->cmk_cmd($site, " -I $all_hosts");
-                $cmk->cmk_cmd($site, " -R");
+                $inv_retval = $cmk->cmk_cmd($site, " -I $all_hosts 2>&1");
+                $res_retval = $cmk->cmk_cmd($site, " -R");
             } catch(Exception $e) {
                 return error_json( $e->getMessage() );
             }
 
-            return response_json('success', 'The request has been executed.');
+            return response_json('success', sprintf('The request has been executed. Inventory command output: %s Restart command output: %s', $inv_retval, $res_retval ));
         }
 
         public function del_hosts($params)
@@ -988,10 +991,12 @@
                     }
                 }
             }
+        
+            $retval = '';
 
             try {
                 $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
-                $cmk->cmk_cmd($site, " -R");
+                $retval = $cmk->cmk_cmd($site, " -R");
             } catch(Exception $e) {
                 return error_json( $e->getMessage() );
             }
@@ -1006,7 +1011,7 @@
                 return error_json("WARNINGS: " . implode("\n", $warnings));
             }
 
-            return response_json('success', 'The request has been executed.');
+            return response_json('success', 'The request has been executed. Results: ' . $retval);
         }
     }
 ?>

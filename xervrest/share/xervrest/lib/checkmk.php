@@ -24,7 +24,7 @@ class CheckMkCfg
         $orig_cfg = $this->cfg_file;
         foreach($hosts as $host)
         {
-            $host_list .= sprintf(" %s", $host['ip']);
+            $host_list .= sprintf(" %s", $host['hostname']);
             $this->cfg_file = sprintf('%s%s.mk', $orig_cfg, $host['ip']);
             $this->add_host($host);
         }
