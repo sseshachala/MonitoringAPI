@@ -1,0 +1,9 @@
+{
+	"name": "Test",
+	"include_plans": [
+		"Basic"
+		],
+	"checks":["bla_plan"],
+
+	"active": true
+}
