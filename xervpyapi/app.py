@@ -172,6 +172,9 @@ def after_request(response):
 
 @app.errorhandler(404)
 def not_found(error=None):
+    """Error handler
+
+    """
     message = {
             'status': 'error',
             'message': 'Not Found: ' + request.url,
@@ -183,12 +186,76 @@ def not_found(error=None):
 
 @app.route('/get_templates')
 def get_templates():
+    """Get all active templates
+
+    This method will be moved to global API
+
+    Return all plans info
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        GET /get_templates
+        Accept: application/json, text/javascript
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type    application/json
+
+        {
+          "test": [
+            "bla_plan"
+          ],
+          "professional": [
+            "uname",
+            "netstat"
+          ],
+          "status": "OK",
+          "basic": [
+            "cpu"
+          ]
+        }
+    """
     plans = load_plans()
     return response_data(**plans)
 
 
 @app.route('/get_template/<template>')
 def get_template(template):
+    """Get template info
+
+    This method will be moved to global API
+
+    :param string template: plan name
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        GET /get_template/professional
+        Accept: application/json, text/javascript
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type    application/json
+
+        {
+          "status": "OK",
+          "plan": [
+            "uname",
+            "netstat"
+          ],
+          "name": "professional"
+        }
+
+    """
     plans = load_plans()
     plan = plans.get(template)
     if plan is None:
@@ -198,7 +265,56 @@ def get_template(template):
 
 @app.route('/add_template', methods=["POST"])
 def add_template():
+    """Add new plan with checks
+
+    This method will be moved to global API
+
+    The plan stores in json file for now. It will move to db
+    If plan name already exists it will overwrite checks and update the file
+
+    :jsonparam string name: plan to be changed
+    :jsonparam list checks: checks in the plan
+    :jsonparam bool active: if plan is active
+    :jsonparam list include_plans: other existing plans. Checks from this plans will be included to this plan
+
+
+    **Post data**:
+
+    .. code-block:: json
+
+        {
+                "name": "Test",
+                "include_plans": [
+                        "Basic"
+                        ],
+                "checks":["bla_plan"],
+
+                "active": true
+        }
+
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        POST /add_template
+        Accept: application/json, text/javascript
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type    application/json
+        {
+            "status": "OK",
+            "name": "Test"
+        }
+
+    """
     plan = request.json
+    if not plan:
+        return failed_response("Wrong data in request")
     upd, msg= update_plans(plan)
     if upd:
         return response_data(name=plan['name'])
@@ -206,8 +322,36 @@ def add_template():
         return failed_response("Could not add plan. %s" % msg if msg is not
                 None else '')
 
+
 @app.route("/add_check/<plan>/<check>")
 def add_check(plan, check):
+    """Add check to given plan
+
+    This method will be moved to global API
+
+    :param string plan: plan to be changed
+    :param string check: check to be added to the plan
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        GET /add_check/professional/new
+        Accept: application/json, text/javascript
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type    application/json
+        {
+          "status": "OK",
+          "check": "new",
+          "plan": "professional"
+        }
+
+    """
     plan = plan.lower()
     check = check.lower()
     plans = copy_plans()
@@ -229,8 +373,35 @@ def add_check(plan, check):
         return failed_response(msg)
 
 
-@app.route("/delete_from/<plan>/<check>")
+@app.route("/delete_check/<plan>/<check>")
 def delete_check(plan, check):
+    """Deletes check from given plan
+
+    This method will be moved to global API
+
+    :param string plan: plan to be changed
+    :param string check: check to be removed from the plan
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        GET /delete_check/professional/new
+        Accept: application/json, text/javascript
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type    application/json
+        {
+          "status": "OK",
+          "check": "new",
+          "plan": "professional"
+        }
+
+    """
     plan = plan.lower()
     check = check.lower()
     plans = copy_plans()
@@ -286,6 +457,41 @@ def inventory_host(host_name):
 
 @app.route('/enable_host', methods=["POST"])
 def enable_host():
+    """Enable host in xmd
+
+    add host to check_mk config
+
+    :jsonparam string host: host to be enabled
+
+    **Post data**:
+
+    .. code-block:: json
+
+        {
+            "name": "Tests",
+            "host": "10.10.10.10"
+        }
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        POST /enable_host
+        Accept: application/json, text/javascript
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type    application/json
+        {
+          "status": "OK",
+          "host": "10.10.10.10",
+          "name": "Tests"
+        }
+
+    """
     data = request.json
     if data is None:
         return failed_response("No json data supplied")
@@ -307,6 +513,39 @@ def enable_host():
 
 @app.route('/disable_host', methods=["POST"])
 def disable_host():
+    """Disable host
+    in the check_mk configuration
+
+    :jsonparam string host: host to be disabled
+
+    **Post data**:
+
+    .. code-block:: json
+
+        {
+            "name": "Tests",
+            "host": "10.10.10.10"
+        }
+
+    **Example request**:
+
+    .. sourcecode:: http
+
+        POST /disable_host
+        Accept: application/json, text/javascript
+
+    **Example response**:
+
+    .. sourcecode:: http
+
+        HTTP/1.1 200 OK
+        Content-Type    application/json
+        {
+          "status": "OK",
+          "host": "10.10.10.10"
+        }
+
+    """
     if request.json is None:
         return failed_response("No json data supplied")
     host = request.json.get('host')
