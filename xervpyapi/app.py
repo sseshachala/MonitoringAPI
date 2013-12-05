@@ -1,4 +1,5 @@
 import os
+import re
 import json
 from functools import wraps
 import shlex
@@ -7,6 +8,7 @@ import subprocess
 from flask import Flask
 
 from flask import jsonify, request
+from flask.exceptions import JSONBadRequest
 from werkzeug.exceptions import default_exceptions
 from werkzeug.exceptions import HTTPException
 
@@ -47,6 +49,23 @@ app.config.from_pyfile(os.path.join(PROJECT_PATH, 'settings.py'))
 CONFIG_PATH = os.path.expanduser('~/etc/xervpyapi/xervpyapi.conf')
 if os.path.exists(CONFIG_PATH):
     app.config.from_pyfile(CONFIG_PATH)
+
+
+def ensure_json(json_params):
+    def decor(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            try:
+                json_data = request.json
+            except JSONBadRequest:
+                return failed_response("No json data")
+            for param in json_params:
+                if param not in json_data:
+                    return failed_response("No json param %s in request data" %
+                            param)
+            return f(*args, **kwargs)
+        return wrapper
+    return decor
 
 
 
@@ -439,9 +458,12 @@ def get_host_config(host):
     return host_file
 
 
-def get_check_config(host, check):
+def get_check_config():
     config_dir = get_check_dir()
-    check_file = os.path.join(config_dir, app.config['XMD_CHECK_CONFIG'].format(check=check, host=host))
+    check_file = os.path.join(config_dir, app.config['XMD_CHECK_CONFIG'])
+    if not os.path.exists(check_file):
+        with open(check_file, 'w'):
+            pass
     return check_file
 
 
@@ -561,6 +583,84 @@ def disable_host():
     reload_cmk()
     return response_data(host=host)
 
+
+@app.route('/enable_check/<check>')
+def enable_check(check):
+    """Enable check
+
+    :param string check: check to enable
+    """
+    add_checks([check])
+    return response_data()
+
+
+@app.route('/disable_check/<check>')
+def disable_check(check):
+    """Disable check
+
+    :param string check: check to disable
+    """
+    delete_checks([check])
+    return response_data()
+
+
+@app.route('/enable_checks', methods=["POST"])
+@ensure_json(['checks'])
+def enable_checks():
+    """Enable list of checks
+
+    :jsonparam list checks: list of checks to enable
+    """
+    checks = request.json['checks']
+    add_checks(checks)
+    return response_data()
+
+
+@app.route('/disable_checks', methods=["POST"])
+@ensure_json(['checks'])
+def disable_checks():
+    """Disable list of checks
+
+    :jsonparam list checks: list of checks to enable
+    """
+    checks = request.json['checks']
+    delete_checks(checks)
+    return response_data()
+
+
+def add_checks(checks):
+    check_file = get_check_config()
+    with open(check_file, 'r+') as fp:
+        for line in fp:
+            curcheck_search = re.search('ALL_HOSTS, "(([^"])+)"', line)
+            if not curcheck_search:
+                continue
+            curcheck = curcheck_search.groups()[0]
+            if curcheck in checks:
+                checks.remove(curcheck)
+                continue
+        for check in checks:
+            fp.write(
+                'checks += [(ALL_HOSTS, "%s", None, None),]\n' % (check,
+                    )
+                )
+
+def delete_checks(checks):
+    check_file = get_check_config()
+    with open(check_file, 'r+') as fp:
+        old = ''
+        for line in fp:
+            curcheck_search = re.search('ALL_HOSTS, "(([^"])+)"', line)
+            if not curcheck_search:
+                old += line
+                continue
+            curcheck = curcheck_search.groups()[0]
+            if curcheck in checks:
+                continue
+            old += line
+        fp.seek(0)
+        fp.truncate()
+        fp.write(old)
 
 if __name__ == '__main__':
     app.run(host=app.config['APP_HOST'], port=app.config['APP_PORT'])

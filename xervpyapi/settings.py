@@ -5,4 +5,4 @@ SECRET_KEY = 'development'
 
 XMD_CHECK_CONFIG_DIR = '~/etc/check_mk/conf.d/'
 XMD_HOST_CONFIG = 'xervmon_host_{host}.mk'
-XMD_CHECK_CONFIG = 'xervmon_check_{host}_{check}.mk'
+XMD_CHECK_CONFIG = 'xervmon_checks.mk'

@@ -26,7 +26,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="XervPyApi 0.1 documentation" href="index.html" />
-    <link rel="prev" title="&lt;no title&gt;" href="install.html" /> 
+    <link rel="prev" title="Install Instructions" href="install.html" /> 
   </head>
   <body>
     <div class="related">
@@ -42,7 +42,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="install.html" title="&lt;no title&gt;"
+          <a href="install.html" title="Install Instructions"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">XervPyApi 0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -57,6 +57,24 @@
 <h1>app Module<a class="headerlink" href="#app-module" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="api-methods">
 <h2>Api methods<a class="headerlink" href="#api-methods" title="Permalink to this headline">¶</a></h2>
+<dl class="post">
+<dt id="post--disable_checks">
+<tt class="descname">POST </tt><tt class="descname">/disable_checks</tt><a class="headerlink" href="#post--disable_checks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disable list of checks</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Json Parameters:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>checks</strong> (<em>list</em>) &#8211; list of checks to enable</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="get">
 <dt id="get--get_templates">
 <tt class="descname">GET </tt><tt class="descname">/get_templates</tt><a class="headerlink" href="#get--get_templates" title="Permalink to this definition">¶</a></dt>
@@ -85,6 +103,24 @@ Content-Type    application/json
   ]
 }</pre>
 </div>
+</dd></dl>
+
+<dl class="post">
+<dt id="post--enable_checks">
+<tt class="descname">POST </tt><tt class="descname">/enable_checks</tt><a class="headerlink" href="#post--enable_checks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable list of checks</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Json Parameters:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>checks</strong> (<em>list</em>) &#8211; list of checks to enable</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="post">
@@ -277,6 +313,23 @@ Content-Type    application/json
 </dd></dl>
 
 <dl class="get">
+<dt id="get--disable_check-(check)">
+<tt class="descname">GET </tt><tt class="descname">/disable_check/</tt><big>(</big><em>check</em><big>)</big><a class="headerlink" href="#get--disable_check-(check)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disable check</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>check</strong> (<em>string</em>) &#8211; check to disable</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="get">
 <dt id="get--get_template-(template)">
 <tt class="descname">GET </tt><tt class="descname">/get_template/</tt><big>(</big><em>template</em><big>)</big><a class="headerlink" href="#get--get_template-(template)" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get template info</p>
@@ -309,6 +362,23 @@ Content-Type    application/json
   "name": "professional"
 }</pre>
 </div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--enable_check-(check)">
+<tt class="descname">GET </tt><tt class="descname">/enable_check/</tt><big>(</big><em>check</em><big>)</big><a class="headerlink" href="#get--enable_check-(check)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable check</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>check</strong> (<em>string</em>) &#8211; check to enable</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="get">
@@ -366,7 +436,7 @@ type, and will contain JSON like this (just an example):</p>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="install.html"
-                        title="previous chapter">&lt;no title&gt;</a></p>
+                        title="previous chapter">Install Instructions</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/app.txt"
@@ -402,7 +472,7 @@ type, and will contain JSON like this (just an example):</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="install.html" title="&lt;no title&gt;"
+          <a href="install.html" title="Install Instructions"
              >previous</a> |</li>
         <li><a href="index.html">XervPyApi 0.1 documentation</a> &raquo;</li> 
       </ul>
