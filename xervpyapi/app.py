@@ -8,9 +8,8 @@ import subprocess
 from flask import Flask
 
 from flask import jsonify, request
-from flask.exceptions import JSONBadRequest
 from werkzeug.exceptions import default_exceptions
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import HTTPException, BadRequest
 
 __all__ = ['make_json_app']
 
@@ -57,7 +56,7 @@ def ensure_json(json_params):
         def wrapper(*args, **kwargs):
             try:
                 json_data = request.json
-            except JSONBadRequest:
+            except BadRequest:
                 return failed_response("No json data")
             for param in json_params:
                 if param not in json_data:
