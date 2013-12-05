@@ -115,7 +115,10 @@ Content-Type    application/json
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name" colspan="2">Json Parameters:</th></tr>
 <tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
-<li><strong>checks</strong> (<em>list</em>) &#8211; list of checks to enable</li>
+<li><strong>checks</strong> (<em>list</em>) &#8211; list of dictionaries with checks to enable</li>
+<li><strong>checks[&#8216;name&#8217;]</strong> (<em>string</em>) &#8211; check name</li>
+<li><strong>checks[&#8216;item&#8217;]</strong> (<em>string</em>) &#8211; A check item or the keyword None for checks that do not need an item.</li>
+<li><strong>checks[&#8216;params&#8217;]</strong> (<em>string</em>) &#8211; Paramters for the check or the keyword None for checks that do not need a parameter.</li>
 </ul>
 </td>
 </tr>
@@ -207,6 +210,26 @@ Content-Type    application/json
   "host": "10.10.10.10"
 }</pre>
 </div>
+</dd></dl>
+
+<dl class="post">
+<dt id="post--enable_check">
+<tt class="descname">POST </tt><tt class="descname">/enable_check</tt><a class="headerlink" href="#post--enable_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable check</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Json Parameters:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>string</em>) &#8211; check name</li>
+<li><strong>item</strong> (<em>string</em>) &#8211; A check item or the keyword None for checks that do not need an item.</li>
+<li><strong>params</strong> (<em>string</em>) &#8211; Paramters for the check or the keyword None for checks that do not need a parameter.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="post">
@@ -362,23 +385,6 @@ Content-Type    application/json
   "name": "professional"
 }</pre>
 </div>
-</dd></dl>
-
-<dl class="get">
-<dt id="get--enable_check-(check)">
-<tt class="descname">GET </tt><tt class="descname">/enable_check/</tt><big>(</big><em>check</em><big>)</big><a class="headerlink" href="#get--enable_check-(check)" title="Permalink to this definition">¶</a></dt>
-<dd><p>Enable check</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>check</strong> (<em>string</em>) &#8211; check to enable</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="get">

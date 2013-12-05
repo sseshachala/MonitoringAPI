@@ -583,13 +583,21 @@ def disable_host():
     return response_data(host=host)
 
 
-@app.route('/enable_check/<check>')
-def enable_check(check):
+@app.route('/enable_check', methods=["POST"])
+@ensure_json(['name', 'item', 'params'])
+def enable_check():
     """Enable check
 
-    :param string check: check to enable
+    :jsonparam string name: check name
+    :jsonparam string item: A check item or the keyword None for checks that do not need an item.
+    :jsonparam string params: Paramters for the check or the keyword None for checks that do not need a parameter.
     """
-    add_checks([check])
+    json_data = request.json
+    add_checks([dict(
+        name=json_data['name'],
+        item=json_data['item'],
+        params=json_data['params']
+        )])
     return response_data()
 
 
@@ -608,7 +616,10 @@ def disable_check(check):
 def enable_checks():
     """Enable list of checks
 
-    :jsonparam list checks: list of checks to enable
+    :jsonparam list checks: list of dictionaries with checks to enable
+    :jsonparam string checks['name']: check name
+    :jsonparam string checks['item']: A check item or the keyword None for checks that do not need an item.
+    :jsonparam string checks['params']: Paramters for the check or the keyword None for checks that do not need a parameter.
     """
     checks = request.json['checks']
     add_checks(checks)
@@ -629,18 +640,22 @@ def disable_checks():
 
 def add_checks(checks):
     check_file = get_check_config()
+    checks_data = dict([(d['name'], d) for d in checks])
     with open(check_file, 'r+') as fp:
         for line in fp:
             curcheck_search = re.search('ALL_HOSTS, "(([^"])+)"', line)
             if not curcheck_search:
                 continue
             curcheck = curcheck_search.groups()[0]
-            if curcheck in checks:
-                checks.remove(curcheck)
+            if curcheck in checks_data:
+                del checks[curcheck]
                 continue
-        for check in checks:
+        for check in checks_data.values():
             fp.write(
-                'checks += [(ALL_HOSTS, "%s", None, None),]\n' % (check,
+                'checks += [(ALL_HOSTS, "%s", %s, %s),]\n' % (
+                    check['name'],
+                    check['item'],
+                    check['params']
                     )
                 )
 
