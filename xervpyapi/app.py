@@ -598,6 +598,7 @@ def enable_check():
         item=json_data['item'],
         params=json_data['params']
         )])
+    reload_cmk()
     return response_data()
 
 
@@ -608,6 +609,7 @@ def disable_check(check):
     :param string check: check to disable
     """
     delete_checks([check])
+    reload_cmk()
     return response_data()
 
 
@@ -623,6 +625,7 @@ def enable_checks():
     """
     checks = request.json['checks']
     add_checks(checks)
+    reload_cmk()
     return response_data()
 
 
@@ -635,6 +638,7 @@ def disable_checks():
     """
     checks = request.json['checks']
     delete_checks(checks)
+    reload_cmk()
     return response_data()
 
 
