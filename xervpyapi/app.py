@@ -67,6 +67,16 @@ def ensure_json(json_params):
     return decor
 
 
+def get_interface_ip(ifname='eth0'):
+    import socket
+    # import fcntl
+    # import struct
+    # s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # return socket.inet_ntoa(fcntl.ioctl(s.fileno(), 0x8915, struct.pack('256s',
+    #                         ifname[:15]))[20:24])
+    return socket.gethostbyname(socket.gethostname())
+
+SERVER_IP = get_interface_ip()
 
 #### AUTH BLOCK ####
 
@@ -94,6 +104,11 @@ def requires_auth(f):
         return f(*args, **kwargs)
 
     return decorated
+
+
+@app.route('/authenticate')
+def dummy_auth():
+    return response_data(broker_ip=SERVER_IP)
 
 
 #### END AUTH BLOCK ####
