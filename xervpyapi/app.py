@@ -69,12 +69,14 @@ def ensure_json(json_params):
 
 def get_interface_ip(ifname='eth0'):
     import socket
-    # import fcntl
-    # import struct
-    # s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    # return socket.inet_ntoa(fcntl.ioctl(s.fileno(), 0x8915, struct.pack('256s',
-    #                         ifname[:15]))[20:24])
-    return socket.gethostbyname(socket.gethostname())
+    import fcntl
+    import struct
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        return socket.inet_ntoa(fcntl.ioctl(s.fileno(), 0x8915, struct.pack('256s',
+                            ifname[:15]))[20:24])
+    except Exception, e:
+        return socket.gethostbyname(socket.gethostname())
 
 SERVER_IP = get_interface_ip()
 
