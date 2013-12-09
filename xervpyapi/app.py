@@ -491,7 +491,7 @@ def reload_cmk():
     run("cmk -R")
 
 def inventory_host(host_name):
-    run("cmk -R && cmk -I @%s" % host_name)
+    run("cmk -I @%s && cmk -R" % host_name)
 
 @app.route('/enable_host', methods=["POST"])
 def enable_host():
