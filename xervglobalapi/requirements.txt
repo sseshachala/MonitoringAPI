@@ -1,4 +1,7 @@
 Flask
 werkzeug
+requests
 mongoengine
 flask-mongoengine
+celery
+redis

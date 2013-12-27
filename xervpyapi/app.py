@@ -335,7 +335,7 @@ def enable_checks():
     :jsonparam list checks: list of dictionaries with checks to enable
     :jsonparam string checks['name']: check name
     :jsonparam string checks['item']: A check item or the keyword None for checks that do not need an item.
-    :jsonparam string checks['params']: Paramters for the check or the keyword None for checks that do not need a parameter.
+    :jsonparam string checks['params']: Parameters for the check or the keyword None for checks that do not need a parameter.
     """
     checks = request.json['checks']
     add_checks(checks)

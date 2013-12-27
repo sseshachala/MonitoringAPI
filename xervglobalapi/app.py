@@ -10,11 +10,25 @@ from flask.ext.mongoengine import MongoEngine
 
 from flask import jsonify, request
 
+from celery import Celery
+
 from werkzeug.exceptions import default_exceptions
 from werkzeug.exceptions import HTTPException, BadRequest
 
 __all__ = ['make_json_app']
 
+
+def make_celery(app):
+    celery = Celery(app.import_name, broker=app.config['CELERY_BROKER_URL'])
+    celery.conf.update(app.config)
+    TaskBase = celery.Task
+    class ContextTask(TaskBase):
+        abstract = True
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return TaskBase.__call__(self, *args, **kwargs)
+    celery.Task = ContextTask
+    return celery
 
 def make_json_app(import_name, **kwargs):
     """
@@ -56,6 +70,8 @@ if os.path.exists(CONFIG_PATH):
     app.config.from_pyfile(CONFIG_PATH)
 
 #### END CONFIG PART ####
+
+celery = make_celery(app)
 
 db = MongoEngine(app)
 
@@ -581,6 +597,41 @@ def delete_check(plan, check):
         return response_data(check=check, plan=plan)
     else:
         return failed_response(msg)
+
+
+@app.route("/create_activate", methods=["POST"])
+@ensure_json(["site", "plan"])
+def create_activate():
+    """Create site and activate given plan
+
+    :jsonparam string site: site name to create
+    :jsonparam string plan: plan to activate
+    """
+    data = request.json
+    plan_name = data['plan']
+    plan = Plan.objects(name__exact=plan_name).first()
+    if not plan:
+        return failed_response("Plan '%s' does not exist" % plan_name)
+    checks = plan.plan_checks()
+
+    result = activate_site.delay(data['site'], checks)
+    return response_data(task_id=result.task_id)
+
+
+@app.route("/creation_task_state/<task_id>")
+def check_creation_task(task_id):
+    result = activate_site.AsyncResult(task_id)
+    return response_data(state=result.state)
+
+
+@celery.task(name="activate_task")
+def activate_site(name, checks):
+    run('ls')
+    # run('omd create %s' % name)
+
+
+def make_site_apiurl(sitename):
+    return app.config['SITE_API_URL'].format(sitename=sitename)
 
 
 def run(command):
