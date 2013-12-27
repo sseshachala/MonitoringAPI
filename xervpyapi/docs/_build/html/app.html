@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -15,7 +13,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -75,36 +73,6 @@
 </table>
 </dd></dl>
 
-<dl class="get">
-<dt id="get--get_templates">
-<tt class="descname">GET </tt><tt class="descname">/get_templates</tt><a class="headerlink" href="#get--get_templates" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get all active templates</p>
-<p>This method will be moved to global API</p>
-<p>Return all plans info</p>
-<p><strong>Example request</strong>:</p>
-<div class="highlight-http"><pre>GET /get_templates
-Accept: application/json, text/javascript</pre>
-</div>
-<p><strong>Example response</strong>:</p>
-<div class="highlight-http"><pre>HTTP/1.1 200 OK
-Content-Type    application/json
-
-{
-  "test": [
-    "bla_plan"
-  ],
-  "professional": [
-    "uname",
-    "netstat"
-  ],
-  "status": "OK",
-  "basic": [
-    "cpu"
-  ]
-}</pre>
-</div>
-</dd></dl>
-
 <dl class="post">
 <dt id="post--enable_checks">
 <tt class="descname">POST </tt><tt class="descname">/enable_checks</tt><a class="headerlink" href="#post--enable_checks" title="Permalink to this definition">¶</a></dt>
@@ -124,54 +92,6 @@ Content-Type    application/json
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="post">
-<dt id="post--add_template">
-<tt class="descname">POST </tt><tt class="descname">/add_template</tt><a class="headerlink" href="#post--add_template" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add new plan with checks</p>
-<p>This method will be moved to global API</p>
-<p>The plan stores in json file for now. It will move to db
-If plan name already exists it will overwrite checks and update the file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name" colspan="2">Json Parameters:</th></tr>
-<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
-<li><strong>name</strong> (<em>string</em>) &#8211; plan to be changed</li>
-<li><strong>checks</strong> (<em>list</em>) &#8211; checks in the plan</li>
-<li><strong>active</strong> (<em>bool</em>) &#8211; if plan is active</li>
-<li><strong>include_plans</strong> (<em>list</em>) &#8211; other existing plans. Checks from this plans will be included to this plan</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Post data</strong>:</p>
-<div class="highlight-json"><div class="highlight"><pre><span class="p">{</span>
-        <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Test&quot;</span><span class="p">,</span>
-        <span class="nt">&quot;include_plans&quot;</span><span class="p">:</span> <span class="p">[</span>
-                <span class="s2">&quot;Basic&quot;</span>
-                <span class="p">],</span>
-        <span class="nt">&quot;checks&quot;</span><span class="p">:[</span><span class="s2">&quot;bla_plan&quot;</span><span class="p">],</span>
-
-        <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-<p><strong>Example request</strong>:</p>
-<div class="highlight-http"><pre>POST /add_template
-Accept: application/json, text/javascript</pre>
-</div>
-<p><strong>Example response</strong>:</p>
-<div class="highlight-http"><pre>HTTP/1.1 200 OK
-Content-Type    application/json
-{
-    "status": "OK",
-    "name": "Test"
-}</pre>
-</div>
 </dd></dl>
 
 <dl class="post">
@@ -272,70 +192,6 @@ Content-Type    application/json
 </dd></dl>
 
 <dl class="get">
-<dt id="get--delete_check-(plan)-(check)">
-<tt class="descname">GET </tt><tt class="descname">/delete_check/</tt><big>(</big><em>plan</em><big>)</big><tt class="descname">/</tt><big>(</big><em>check</em><big>)</big><a class="headerlink" href="#get--delete_check-(plan)-(check)" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes check from given plan</p>
-<p>This method will be moved to global API</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>plan</strong> (<em>string</em>) &#8211; plan to be changed</li>
-<li><strong>check</strong> (<em>string</em>) &#8211; check to be removed from the plan</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Example request</strong>:</p>
-<div class="highlight-http"><pre>GET /delete_check/professional/new
-Accept: application/json, text/javascript</pre>
-</div>
-<p><strong>Example response</strong>:</p>
-<div class="highlight-http"><pre>HTTP/1.1 200 OK
-Content-Type    application/json
-{
-  "status": "OK",
-  "check": "new",
-  "plan": "professional"
-}</pre>
-</div>
-</dd></dl>
-
-<dl class="get">
-<dt id="get--add_check-(plan)-(check)">
-<tt class="descname">GET </tt><tt class="descname">/add_check/</tt><big>(</big><em>plan</em><big>)</big><tt class="descname">/</tt><big>(</big><em>check</em><big>)</big><a class="headerlink" href="#get--add_check-(plan)-(check)" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add check to given plan</p>
-<p>This method will be moved to global API</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>plan</strong> (<em>string</em>) &#8211; plan to be changed</li>
-<li><strong>check</strong> (<em>string</em>) &#8211; check to be added to the plan</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Example request</strong>:</p>
-<div class="highlight-http"><pre>GET /add_check/professional/new
-Accept: application/json, text/javascript</pre>
-</div>
-<p><strong>Example response</strong>:</p>
-<div class="highlight-http"><pre>HTTP/1.1 200 OK
-Content-Type    application/json
-{
-  "status": "OK",
-  "check": "new",
-  "plan": "professional"
-}</pre>
-</div>
-</dd></dl>
-
-<dl class="get">
 <dt id="get--disable_check-(check)">
 <tt class="descname">GET </tt><tt class="descname">/disable_check/</tt><big>(</big><em>check</em><big>)</big><a class="headerlink" href="#get--disable_check-(check)" title="Permalink to this definition">¶</a></dt>
 <dd><p>Disable check</p>
@@ -350,41 +206,6 @@ Content-Type    application/json
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="get">
-<dt id="get--get_template-(template)">
-<tt class="descname">GET </tt><tt class="descname">/get_template/</tt><big>(</big><em>template</em><big>)</big><a class="headerlink" href="#get--get_template-(template)" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get template info</p>
-<p>This method will be moved to global API</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>template</strong> (<em>string</em>) &#8211; plan name</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Example request</strong>:</p>
-<div class="highlight-http"><pre>GET /get_template/professional
-Accept: application/json, text/javascript</pre>
-</div>
-<p><strong>Example response</strong>:</p>
-<div class="highlight-http"><pre>HTTP/1.1 200 OK
-Content-Type    application/json
-
-{
-  "status": "OK",
-  "plan": [
-    "uname",
-    "netstat"
-  ],
-  "name": "professional"
-}</pre>
-</div>
 </dd></dl>
 
 <dl class="get">
@@ -485,7 +306,7 @@ type, and will contain JSON like this (just an example):</p>
     </div>
     <div class="footer">
         &copy; Copyright 2013, Artemiy Rodionov.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
     </div>
   </body>
 </html>
