@@ -1,0 +1,4 @@
+Flask
+werkzeug
+mongoengine
+flask-mongoengine

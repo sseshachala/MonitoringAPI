@@ -1,1 +1,74 @@
-../init.d/graphios
+#! /bin/bash
+#
+# simple init script for graphios
+#
+#
+# chkconfig: 345 99 01
+# description: graphios nagios -> graphite script
+#
+# File : graphios
+
+prog="###ROOT###/bin/graphios.py --config=###ROOT###/etc/graphios/graphios.ini"
+RETVAL=0
+
+start () {
+        echo -n "Starting graphios..."
+        $prog &
+        RETVAL=$?
+        if [ $RETVAL -eq 0 ] 
+        then
+            echo "OK"
+        else
+            echo "FAILED"
+        fi
+}
+
+stop () {
+        echo -n "Stopping graphios..."
+        if [ -e ###ROOT###/tmp/graphios.pid ]
+        then
+            kill `cat ###ROOT###/tmp/graphios.pid`
+            RETVAL=$?
+            if [ $RETVAL -eq 0 ]
+            then
+                if [ -e ###ROOT###/tmp/graphios.pid ]
+                then
+                    rm ###ROOT###/tmp/graphios.pid
+                fi
+                echo "OK"
+            else
+                echo "FAILED"
+            fi
+        else
+            echo "WARNING (NO PID FILE FOUND)"
+        fi
+}
+
+restart () {
+        stop
+        start
+}
+
+
+# See how we are called.
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart|reload)
+        restart
+        ;;
+  status)
+        status $prog
+        RETVAL=$?
+        ;;
+  *)
+        echo "Usage: service graphios {start|stop|restart|reload}"
+        RETVAL=2
+        ;;
+esac
+
+exit $RETVAL

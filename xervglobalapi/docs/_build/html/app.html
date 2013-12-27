@@ -1,0 +1,420 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>app Module &mdash; XervPyApi 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="XervPyApi 0.1 documentation" href="index.html" />
+    <link rel="prev" title="Install Instructions" href="install.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Install Instructions"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">XervPyApi 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="app-module">
+<h1>app Module<a class="headerlink" href="#app-module" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="api-methods">
+<h2>Api methods<a class="headerlink" href="#api-methods" title="Permalink to this headline">¶</a></h2>
+<dl class="post">
+<dt id="post--update_plan">
+<tt class="descname">POST </tt><tt class="descname">/update_plan</tt><a class="headerlink" href="#post--update_plan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update plan</p>
+<p>Delete plan and create new with given params</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Json Parameters:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>string</em>) &#8211; plan to be changed</li>
+<li><strong>checks</strong> (<em>list</em>) &#8211; checks in the plan</li>
+<li><strong>active</strong> (<em>bool</em>) &#8211; if plan is active</li>
+<li><strong>include_plans</strong> (<em>list</em>) &#8211; other existing plans.
+Checks from this plans will be included to this plan</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Post data</strong>:</p>
+<div class="highlight-json"><div class="highlight"><pre><span class="p">{</span>
+        <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Test&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;include_plans&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;Basic&quot;</span>
+                <span class="p">],</span>
+        <span class="nt">&quot;checks&quot;</span><span class="p">:[</span><span class="s2">&quot;bla_plan&quot;</span><span class="p">],</span>
+
+        <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-http"><pre>POST /update_plan
+Accept: application/json, text/javascript
+Content-Type:    application/json</pre>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-http"><pre>HTTP/1.1 200 OK
+Content-Type    application/json
+{
+    "status": "OK",
+    "name": "Test"
+}</pre>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--get_plans">
+<tt class="descname">GET </tt><tt class="descname">/get_plans</tt><a class="headerlink" href="#get--get_plans" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all active plans</p>
+<p>Return all plans checks</p>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-http"><pre>GET /get_plans
+Accept: application/json, text/javascript
+Content-Type:    application/json</pre>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-http"><div class="highlight"><pre><span class="kr">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">200</span> <span class="ne">OK</span>
+<span class="na">Content-Type</span><span class="o">:</span>    <span class="l">application/json</span>
+
+<span class="p">{</span>
+  <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;OK&quot;</span><span class="p">,</span>
+  <span class="nt">&quot;checks&quot;</span><span class="p">:{</span>
+  <span class="nt">&quot;test&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="s2">&quot;bla_plan&quot;</span>
+  <span class="p">],</span>
+  <span class="nt">&quot;professional&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="s2">&quot;uname&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;netstat&quot;</span>
+  <span class="p">],</span>
+  <span class="nt">&quot;basic&quot;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="s2">&quot;cpu&quot;</span>
+  <span class="p">]</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="post">
+<dt id="post--add_plan">
+<tt class="descname">POST </tt><tt class="descname">/add_plan</tt><a class="headerlink" href="#post--add_plan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add new plan with checks</p>
+<p>If plan already exists returns error</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Json Parameters:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>string</em>) &#8211; plan to be changed</li>
+<li><strong>checks</strong> (<em>list</em>) &#8211; checks in the plan</li>
+<li><strong>active</strong> (<em>bool</em>) &#8211; if plan is active</li>
+<li><strong>include_plans</strong> (<em>list</em>) &#8211; other existing plans.
+Checks from this plans will be included to this plan</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Post data</strong>:</p>
+<div class="highlight-json"><div class="highlight"><pre><span class="p">{</span>
+        <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Test&quot;</span><span class="p">,</span>
+        <span class="nt">&quot;include_plans&quot;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="s2">&quot;Basic&quot;</span>
+                <span class="p">],</span>
+        <span class="nt">&quot;checks&quot;</span><span class="p">:[</span><span class="s2">&quot;bla_plan&quot;</span><span class="p">],</span>
+
+        <span class="nt">&quot;active&quot;</span><span class="p">:</span> <span class="kc">true</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-http"><pre>POST /add_plan
+Accept: application/json, text/javascript
+Content-Type:    application/json</pre>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-http"><pre>HTTP/1.1 200 OK
+Content-Type    application/json
+{
+    "status": "OK",
+    "name": "Test"
+}</pre>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--delete_check-(plan)-(check)">
+<tt class="descname">GET </tt><tt class="descname">/delete_check/</tt><big>(</big><em>plan</em><big>)</big><tt class="descname">/</tt><big>(</big><em>check</em><big>)</big><a class="headerlink" href="#get--delete_check-(plan)-(check)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes check from given plan</p>
+<p>Add check to exclude_checks list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>plan</strong> (<em>string</em>) &#8211; plan to be changed</li>
+<li><strong>check</strong> (<em>string</em>) &#8211; check to be removed from the plan</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-http"><pre>GET /delete_check/professional/new
+Accept: application/json, text/javascript
+Content-Type:    application/json</pre>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-http"><pre>HTTP/1.1 200 OK
+Content-Type    application/json
+{
+  "status": "OK",
+  "check": "new",
+  "plan": "professional"
+}</pre>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--add_check-(plan)-(check)">
+<tt class="descname">GET </tt><tt class="descname">/add_check/</tt><big>(</big><em>plan</em><big>)</big><tt class="descname">/</tt><big>(</big><em>check</em><big>)</big><a class="headerlink" href="#get--add_check-(plan)-(check)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add check to given plan</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>plan</strong> (<em>string</em>) &#8211; plan to be changed</li>
+<li><strong>check</strong> (<em>string</em>) &#8211; check to be added to the plan</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-http"><pre>GET /add_check/professional/new
+Accept: application/json, text/javascript
+Content-Type:    application/json</pre>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-http"><pre>HTTP/1.1 200 OK
+Content-Type    application/json
+{
+  "status": "OK",
+  "check": "new",
+  "plan": "professional"
+}</pre>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--delete_plan-(name)">
+<tt class="descname">GET </tt><tt class="descname">/delete_plan/</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#get--delete_plan-(name)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete plan</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>string</em>) &#8211; plan name</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-http"><pre>GET /delete_plan/professional
+Accept: application/json, text/javascript
+Content-Type:    application/json</pre>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-http"><pre>HTTP/1.1 200 OK
+Content-Type    application/json
+
+{
+  "status": "OK",
+  "name": "professional"
+}</pre>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--get_plan-(name)">
+<tt class="descname">GET </tt><tt class="descname">/get_plan/</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#get--get_plan-(name)" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get plan info</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>string</em>) &#8211; plan name</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example request</strong>:</p>
+<div class="highlight-http"><pre>GET /get_plan/professional
+Accept: application/json, text/javascript
+Content-Type:    application/json</pre>
+</div>
+<p><strong>Example response</strong>:</p>
+<div class="highlight-http"><pre>HTTP/1.1 200 OK
+Content-Type    application/json
+
+{
+  "status": "OK",
+  "checks": {
+  "professional": [
+    "uname",
+    "netstat"
+  ]
+  }
+}</pre>
+</div>
+</dd></dl>
+
+<dl class="get">
+<dt id="get--url">
+<tt class="descname">GET </tt><tt class="descname">/url</tt><a class="headerlink" href="#get--url" title="Permalink to this definition">¶</a></dt>
+<dd><p>404 handler</p>
+<blockquote>
+<div><p><strong>Example response</strong>:</p>
+<div class="highlight-http"><pre>HTTP/1.1 404 Not Found
+Content-Type    application/json
+
+{'status': 'error', 'message': 'Not found: url'}</pre>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">code 404:</th><td class="field-body">unknown url</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+</dd></dl>
+
+</div>
+<div class="section" id="module-app">
+<span id="common-methods"></span><h2>Common methods<a class="headerlink" href="#module-app" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="app.make_json_app">
+<tt class="descclassname">app.</tt><tt class="descname">make_json_app</tt><big>(</big><em>import_name</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#app.make_json_app" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a JSON-oriented Flask app.</p>
+<p>All error responses that you don&#8217;t specifically
+manage yourself will have application/json content
+type, and will contain JSON like this (just an example):</p>
+<p>{ &#8220;message&#8221;: &#8220;405: Method Not Allowed&#8221; }</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">app Module</a><ul>
+<li><a class="reference internal" href="#api-methods">Api methods</a></li>
+<li><a class="reference internal" href="#module-app">Common methods</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="previous chapter">Install Instructions</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/app.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="http-routingtable.html" title="HTTP Routing Table"
+             >routing table</a> |</li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Install Instructions"
+             >previous</a> |</li>
+        <li><a href="index.html">XervPyApi 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Artemiy Rodionov.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.
+    </div>
+  </body>
+</html>
