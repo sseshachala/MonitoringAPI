@@ -624,10 +624,20 @@ def check_creation_task(task_id):
     return response_data(state=result.state)
 
 
-@celery.task(name="activate_task")
-def activate_site(name, checks):
+@celery.task(name="create_site_task")
+def create_site(name):
     run('ls')
     # run('omd create %s' % name)
+
+
+@celery.task(name="activate_plan_task")
+def activate_plan(sitename, checks):
+    import requests
+    base_url = make_site_apiurl(sitename)
+    methods = {
+            'enable_checks': 'enable_checks'
+            }
+
 
 
 def make_site_apiurl(sitename):
