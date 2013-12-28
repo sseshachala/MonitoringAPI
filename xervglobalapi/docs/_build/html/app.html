@@ -56,6 +56,25 @@
 <div class="section" id="api-methods">
 <h2>Api methods<a class="headerlink" href="#api-methods" title="Permalink to this headline">¶</a></h2>
 <dl class="post">
+<dt id="post--create_activate">
+<tt class="descname">POST </tt><tt class="descname">/create_activate</tt><a class="headerlink" href="#post--create_activate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create site and activate given plan</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Json Parameters:</th></tr>
+<tr class="field-odd field"><td>&nbsp;</td><td class="field-body"><ul class="first last simple">
+<li><strong>site</strong> (<em>string</em>) &#8211; site name to create</li>
+<li><strong>plan</strong> (<em>string</em>) &#8211; plan to activate</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="post">
 <dt id="post--update_plan">
 <tt class="descname">POST </tt><tt class="descname">/update_plan</tt><a class="headerlink" href="#post--update_plan" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update plan</p>
@@ -119,7 +138,7 @@ Content-Type:    application/json</pre>
 
 <span class="p">{</span>
   <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;OK&quot;</span><span class="p">,</span>
-  <span class="nt">&quot;checks&quot;</span><span class="p">:{</span>
+  <span class="nt">&quot;plans&quot;</span><span class="p">:{</span>
   <span class="nt">&quot;test&quot;</span><span class="p">:</span> <span class="p">[</span>
     <span class="s2">&quot;bla_plan&quot;</span>
   <span class="p">],</span>
@@ -306,7 +325,7 @@ Content-Type    application/json
 
 {
   "status": "OK",
-  "checks": {
+  "plans": {
   "professional": [
     "uname",
     "netstat"

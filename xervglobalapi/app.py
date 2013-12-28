@@ -318,7 +318,7 @@ def get_plans():
 
         {
           "status": "OK",
-          "checks":{
+          "plans":{
           "test": [
             "bla_plan"
           ],
@@ -333,7 +333,7 @@ def get_plans():
         }
     """
     plans = load_plans()
-    return response_data(checks=plans)
+    return response_data(plans=plans)
 
 
 @app.route('/get_plan/<name>')
@@ -359,7 +359,7 @@ def get_plan(name):
 
         {
           "status": "OK",
-          "checks": {
+          "plans": {
           "professional": [
             "uname",
             "netstat"
@@ -372,7 +372,7 @@ def get_plan(name):
     plan = plans.get(name)
     if plan is None:
         return failed_response("No such plan %s" % name)
-    return response_data(checks={name: plan})
+    return response_data(plans={name: plan})
 
 
 @app.route('/delete_plan/<name>', methods=["GET"])

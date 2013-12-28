@@ -5,3 +5,5 @@ mongoengine
 flask-mongoengine
 celery
 redis
+sphinx
+sphinxcontrib-httpdomain
