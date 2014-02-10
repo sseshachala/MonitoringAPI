@@ -119,7 +119,7 @@ class OMDInstaller:
     def install_package(self, os, package_file):
         cmd = 'echo $$; exec nohup '
         
-        #if args.username != 'root': cmd += 'sudo '
+        if args.username != 'root': cmd += 'sudo '
         
         opts = ''
         if os == 'deb':
@@ -130,7 +130,12 @@ class OMDInstaller:
         
         _out, _err = self.run_command(cmd)
         return _out        
- 
+
+    def upload_plugins(self, plugins, dest_dir):
+        for plugin in plugins:
+            dest = '%s/%s' % (dest_dir, os.path.basename(plugin))
+            self.upload_file(plugin, dest)
+            
     def package_is_installed(self, os):
         if os == 'deb': 
             (_out, _err) = self.run_command('dpkg -s check-mk-agent | grep Status:')
@@ -181,6 +186,10 @@ if __name__ == '__main__':
     if args.action == 'install':
         installer.upload_file(package_file, os.path.basename(package_file))
         remote_pid = installer.install_package(_os, os.path.basename(package_file))
+        
+        if 'plugins' in config:
+            installer.upload_plugins(config['plugins'], '/usr/lib/check_mk_agent/plugins')
+        
         print '{ "pid": "%s" }' % remote_pid.rstrip()
 
     if args.action == 'report':

@@ -1,0 +1,30 @@
+# Lee Engel <lee@kode.co.za>
+
+NAGIOS_OK = 0
+NAGIOS_WARN = 1
+NAGIOS_CRIT = 2
+NAGIOS_UNK = 3
+
+def xerv_apache_inventory(agent_data):
+    inv = []
+    for line in agent_data:
+        server = line[0]
+        inv.append( (server, None) )
+    return inv
+    
+def xerv_apache_check(item, params, agent_data):
+    status = NAGIOS_OK
+    message = 'Apache Server(s) OK'
+    
+    for line in agent_data:
+        if line[0] == item:
+            if line[1] == 'DOWN':
+                status = NAGIOS_CRIT
+                message = 'Apache Server %s is DOWN' % item
+    return (status, message)
+
+check_info['xerv_apache'] = {
+    'check_function': xerv_apache_check,
+    'inventory_function': xerv_apache_inventory,
+    'service_description': 'Xerv Apache Check %s',
+}

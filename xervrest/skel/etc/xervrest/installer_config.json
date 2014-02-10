@@ -4,5 +4,9 @@
     "store_output": "1",
     "command_output_dir": "###ROOT###/var/log/omd-agent-installer",
     "rpm_agent": "/omd/versions/default/share/xervrest/agents/check_mk-agent-1.2.2p2-1.noarch.rpm",
-    "deb_agent": "/omd/versions/default/share/xervrest/agents/check-mk-agent_1.2.2p2-2_all.deb"
+    "deb_agent": "/omd/versions/default/share/xervrest/agents/check-mk-agent_1.2.2p2-2_all.deb",
+    "plugins": [ 
+        "/omd/versions/default/share/check_mk/agents/plugins/apache_status", 
+        "/omd/versions/default/share/check_mk/agents/plugins/mk_mysql" 
+    ]
 }
