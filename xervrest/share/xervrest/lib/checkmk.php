@@ -26,13 +26,14 @@ class CheckMkCfg
         {
             $host_list .= sprintf(" %s", $host['hostname']);
             $this->cfg_file = sprintf('%s%s.mk', $orig_cfg, $host['ip']);
-            $this->add_host($host);
+			
+            $this->add_host(array_merge($params, $host));
         }
 
         return $host_list;
     }
-
-    public function add_host($params)
+	
+	 /*public function add_host($params)
     {
         $fh = fopen($this->cfg_file, 'w');
 
@@ -44,6 +45,77 @@ class CheckMkCfg
         $cfg = sprintf("all_hosts += [ \"%s|xervrest|/\" + FOLDER_PATH + \"/\"]\n", $params['hostname']);
         $cfg .= sprintf("ipaddresses.update({'%s': u'%s'})", $params['hostname'], $params['ip']);
 
+        if(fwrite($fh, $cfg) == FALSE)
+        {
+            throw Exception("Could not write to file: " . $this->cfg_file);
+        }
+
+        fclose($fh);
+    }*/
+
+    public function add_host($params)
+    {
+        $fh = fopen($this->cfg_file, 'w');
+
+        if(!$fh)
+        {
+            throw Exception("Could not open file for writing: " . $this->cfg_file);
+        }
+		
+		$all_hosts = $params['hostname'] ;
+		
+		if(!empty($params['agent_type']))
+		{
+			$all_hosts .= '|' . $params['agent_type'];
+		}
+		if(!empty($params['server']))
+		{
+			$all_hosts .= '|' . $params['server'];
+		}
+		if(!empty($params['system']))
+		{
+			$all_hosts .= '|' . $params['system'];
+		}
+		
+		if(!empty($params['mysql']))
+		{
+			$all_hosts .= '|' . $params['mysql'];
+		}
+		
+		if(!empty($params['app1']))
+		{
+			$all_hosts .= '|' . $params['app1'];
+		}
+
+        $cfg = sprintf("all_hosts += [ \"%s|xervrest|/\" + FOLDER_PATH + \"/\"]\n", $all_hosts);
+        $cfg .= sprintf("ipaddresses.update({'%s': u'%s'})\n", $params['hostname'], $params['ip']);
+		
+		$cfg .= sprintf("host_attributes.update({'%s': {'ipaddress': u'%s', 'tag_agent' : '%s','tag_server' : '%s','tag_system' : '%s'}})\n",  
+				$params['hostname'], $params['ip'], $params['agent_type'], $params['server'], $params['system']);
+		
+		if(!empty($params['mysql']))
+		{
+			$cfg .= sprintf("host_attributes.update({'%s': {'ipaddress': u'%s','tag_mysql': '%s',}})\n", $params['hostname'], $params['ip'], $params['mysql']);
+		}
+		
+		if(!empty($params['app1']))
+		{	
+			$services = explode('|', $params['app1']);
+			$tag = '';
+			$i =1;
+			foreach($services as $service)
+			{
+				$tag .= '\'tag_app'.$i++.'\' : \'' . $service .'\',';
+			}
+			if(!empty($tag))
+			{
+				$cfg .= sprintf("host_attributes.update(
+								{'%s': {'ipaddress': u'%s',
+								%s }})\n", $params['hostname'], $params['ip'], $tag);
+			}
+		}
+		
+		
         if(fwrite($fh, $cfg) == FALSE)
         {
             throw Exception("Could not write to file: " . $this->cfg_file);
