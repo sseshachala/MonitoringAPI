@@ -109,9 +109,7 @@ class CheckMkCfg
 			}
 			if(!empty($tag))
 			{
-				$cfg .= sprintf("host_attributes.update(
-								{'%s': {'ipaddress': u'%s',
-								%s }})\n", $params['hostname'], $params['ip'], $tag);
+				$cfg .= sprintf("host_attributes.update({'%s': {'ipaddress': u'%s',%s }})\n", $params['hostname'], $params['ip'], $tag);
 			}
 		}
 		
