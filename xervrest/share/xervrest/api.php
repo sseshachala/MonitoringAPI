@@ -802,6 +802,7 @@ throw $e;
                 'fs_/' => Array('/' ,'growth', 'trend'),
                 'fs_/boot' => Array('/boot' ,'growth', 'trend'),
                 'Check_MK' => Array('execution_time'),
+                'apache' => Array('IdleWorkers', 'BusyWorkers', 'OpenSlots', 'TotalSlots', 'Total_Accesses', 'Total_kBytes', 'CPULoad', 'ReqPerSec', 'BytesPerReq', 'BytesPerSec'),
             );
             return str_replace('\/','/', json_encode($map));
         }
