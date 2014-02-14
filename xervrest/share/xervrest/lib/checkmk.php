@@ -112,6 +112,32 @@ class CheckMkCfg
         fclose($fh);
     }
 
+	public function configureApache($params)
+	{
+		$fh = fopen($this->cfg_file, 'w');
+		 if(!$fh)
+        {
+            throw Exception("Could not open file for writing: " . $this->cfg_file);
+        }
+		$cfg_s = sprintf("checks += [( '%s', 'ps.perf', '%s', ('%s', 1, 1, %d, %d ))]", $params['host'], $params['checkName'], $params['proc'], $params['warnMin'], $params['warnMax']);
+		
+		if(is_array($params['logwatch']))
+		{
+			foreach($params['logwatch'] as $logwatchLog)
+			{
+				$cfg_s .= sprintf("checks += [( '%s', 'logwatch', '%s', "")]", $params['host'], $logwatchLog);
+			}
+			
+		}
+		if(fwrite($fh, $cfg_s) == FALSE)
+        {
+            throw Exception("Could not write to file: " . $this->cfg_file);
+        }
+
+        fclose($fh);
+		
+	}
+
     public function add_ps_check($host, $cname, $proc, $user=false, $warnmin=1, $okmin=1, $okmax=1, $warnmax=1)
     {
         $fh = fopen($this->cfg_file, 'w');

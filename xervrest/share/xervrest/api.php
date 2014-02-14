@@ -1065,5 +1065,36 @@ throw $e;
 
             return response_json('success', 'The request has been executed. Results: ' . $retval);
         }
+
+		 public function configureApache($params)
+        {
+        	if(empty($params['check']) || empty($params['checkName']) || empty($params['host']) )
+			{
+				return error_json('check, checkName and host are mandatory');
+			}
+            $site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $cfg_file = sprintf("%s/xervrest_%s_host_", $cfg_root, $params['check'], $params['checkName']);
+
+            try {
+                $cfg = new CheckMkCfg($cfg_file);
+                $all_hosts = $cfg->configureApache($params);
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+
+            $inv_retval = '';
+            $res_retval = '';
+
+            try {
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $inv_retval = $cmk->cmk_cmd($site, " -I $all_hosts 2>&1");
+                $res_retval = $cmk->cmk_cmd($site, " -R");
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+
+            return response_json('success', sprintf('The request has been executed. Inventory command output: %s Restart command output: %s', $inv_retval, $res_retval ));
+        }
     }
 ?>
