@@ -119,7 +119,7 @@ class CheckMkCfg
         {
             throw Exception("Could not open file for writing: " . $this->cfg_file);
         }
-		$cfg_s = sprintf("checks += [( '%s', 'ps.perf', '%s', ('%s', 1, 1, %d, %d ))]", $params['host'], $params['checkName'], $params['proc'], $params['warnMin'], $params['warnMax']);
+		$cfg_s = sprintf("checks += [( '%s', 'ps.perf', '%s', ('%s', 1, 1, %d, %d ))]\n", $params['host'], $params['checkName'], $params['proc'], $params['warnMin'], $params['warnMax']);
 		
 		if(is_array($params['logwatch']))
 		{

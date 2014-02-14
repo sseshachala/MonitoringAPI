@@ -1074,7 +1074,7 @@ throw $e;
 			}
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $cfg_file = sprintf("%s/xervrest_%s_host_", $cfg_root, $params['check'], $params['checkName']);
+            $cfg_file = sprintf("%s/xervrest_%s_host_%s.mk", $cfg_root, $params['check'], $params['checkName'], $params['host']);
 
             try {
                 $cfg = new CheckMkCfg($cfg_file);
