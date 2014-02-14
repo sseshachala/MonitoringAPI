@@ -77,11 +77,6 @@ class CheckMkCfg
 			$all_hosts .= '|' . $params['system'];
 		}
 		
-		if(!empty($params['mysql']))
-		{
-			$all_hosts .= '|' . $params['mysql'];
-		}
-		
 		if(!empty($params['app1']))
 		{
 			$all_hosts .= '|' . $params['app1'];
@@ -92,11 +87,6 @@ class CheckMkCfg
 		
 		$cfg .= sprintf("host_attributes.update({'%s': {'ipaddress': u'%s', 'tag_agent' : '%s','tag_server' : '%s','tag_system' : '%s'}})\n",  
 				$params['hostname'], $params['ip'], $params['agent_type'], $params['server'], $params['system']);
-		
-		if(!empty($params['mysql']))
-		{
-			$cfg .= sprintf("host_attributes.update({'%s': {'ipaddress': u'%s','tag_mysql': '%s',}})\n", $params['hostname'], $params['ip'], $params['mysql']);
-		}
 		
 		if(!empty($params['app1']))
 		{	
