@@ -141,16 +141,13 @@ class CheckMkCfg
             throw Exception("Could not open file for writing: " . $this->cfg_file);
         }
 		$cfg_s = '';
-		$cfg_s .= sprintf("all_hosts += [ \"%s|xervrest|/\" + FOLDER_PATH + \"/\"]\n", $params['check']);
-        
-		
 		$cfg_s .= sprintf("checks += [( '%s', 'ps.perf', '%s', ('%s', 1, 1, %d, %d ))]\n", $params['hostname'], $params['checkName'], $params['proc'], $params['warnMin'], $params['warnMax']);
 		
 		if(is_array($params['logwatch']))
 		{
 			foreach($params['logwatch'] as $logwatchLog)
 			{
-				$cfg_s .= sprintf("checks += [ ( '%s', 'logwatch', '%s', '') ] ", $params['hostname'], $logwatchLog);
+				$cfg_s .= sprintf("checks += [ ( '%s', 'logwatch', '%s', '') ] \n", $params['hostname'], $logwatchLog);
 			}
 			
 		}
