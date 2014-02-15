@@ -1081,8 +1081,7 @@ throw $e;
 			{
 				$cfg_file = $genConfFile;
 				$cfg = new CheckMkCfg($cfg_file);	
-				$buffer = $cfg -> getContent();
-				$params['buffer'] = $buffer;
+				$params['buffer'] = $cfg -> getContent();
 				
 			}
 			else 
