@@ -1074,7 +1074,7 @@ throw $e;
 			}
             $site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $cfg_file = sprintf("%s/xervrest_%s_host_%s.mk", $cfg_root, $params['check'], $params['checkName'], $params['host']);
+            $cfg_file = sprintf("%s/xervrest_apache_%s.mk", $cfg_root, $params['host']);
 
             try {
                 $cfg = new CheckMkCfg($cfg_file);
@@ -1095,6 +1095,30 @@ throw $e;
             }
 
             return response_json('success', sprintf('The request has been executed. Inventory command output: %s Restart command output: %s', $inv_retval, $res_retval ));
+        }
+
+		 public function getConfiguredApache($params)
+        {
+            $site = get_site();
+            $missing_params = $this->_check_params($params, Array('host'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $host = $params['host'];
+            
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+            $raw_files = glob("$cfg_root/xervrest_apache.$host*.mk");
+            $check_data = Array();
+            //$cfg_file = sprintf("%s/xervrest_%s_host_%s.mk", $cfg_root, $params['checkName'], $params['host']);
+            foreach($raw_files as $file)
+            {
+                $check = preg_replace("/.*xervrest_ps\.(.*?)\.(.*?)\.mk/", '$2', $file);
+                $check_data[$check] = $this->_get_check_data($file);
+            }
+
+            return str_replace('\/','/', json_encode($check_data));
         }
     }
 ?>
