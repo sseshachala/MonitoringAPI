@@ -1068,16 +1068,41 @@ throw $e;
 
 		 public function configureApache($params)
         {
-        	if(empty($params['check']) || empty($params['checkName']) || empty($params['host']) )
+        	if(empty($params['ip']) || empty($params['check']) || empty($params['checkName']) || empty($params['hostname']) )
 			{
 				return error_json('check, checkName and host are mandatory');
 			}
-            $site = get_site();
+		 	
+		 	$site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $cfg_file = sprintf("%s/xervrest_apache_%s.mk", $cfg_root, $params['host']);
-
-            try {
-                $cfg = new CheckMkCfg($cfg_file);
+			$genConfFile = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $params['ip']);
+			$cfg = '';
+			if(file_exists($genConfFile))
+			{
+				$cfg_file = $genConfFile;
+				$cfg = new CheckMkCfg($cfg_file);	
+				
+			}
+			else 
+			{
+				$cfg_file = sprintf("%s/xervrest_apache_%s.mk", $cfg_root, $params['ip']);
+				$cfg = new CheckMkCfg($cfg_file);	
+				try 
+				{
+					$params['app1'] = $params['check'];
+					//defaut
+					$params['agent_type'] = 'cmk_agent'; 
+					$params['server'] = 'vm'; 
+					$params['system'] = 'linux';
+                	$all_hosts = $cfg->add_hosts($params);
+	            } 
+	            catch(Exception $e) 
+	            {
+	                return error_json( $e->getMessage() );
+	            }
+				
+			}
+           try {
                 $all_hosts = $cfg->configureApache($params);
             } catch(Exception $e) {
                 return error_json( $e->getMessage() );
@@ -1109,7 +1134,8 @@ throw $e;
             $host = $params['host'];
             
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-            $raw_files = glob("$cfg_root/xervrest_apache.$host*.mk");
+            $raw_files = glob("$cfg_root/xervrest_apache_$host*.mk");
+			
             $check_data = Array();
             //$cfg_file = sprintf("%s/xervrest_%s_host_%s.mk", $cfg_root, $params['checkName'], $params['host']);
             foreach($raw_files as $file)
