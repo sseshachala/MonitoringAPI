@@ -1085,7 +1085,7 @@ throw $e;
 			}
 			else 
 			{
-				$cfg_file = sprintf("%s/xervrest_apache_%s.mk", $cfg_root, $params['ip']);
+				$cfg_file = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $params['ip']);
 				$cfg = new CheckMkCfg($cfg_file);	
 				try 
 				{
