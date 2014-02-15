@@ -9,14 +9,18 @@ class CheckMkCfg
         $this->cfg_file = $cfg_file;
     }
 	
-	public function getContent()
+	public function getContent($apacheTag)
 	{
 		$handle = @fopen($this->cfg_file, "r");
 		$sb = '';
 		if ($handle) {
 		    while (($buffer = fgets($handle, 4096)) !== false) {
 		        //echo $buffer;
-		        $sb .= $buffer .'\n';
+		        if(startsWith($buffer, 'all_hosts'))
+				{
+					$buffer = str_replace("|xervrest|", '|'.$apacheTag.'|xervrest|', $buffer);
+				}
+		        $sb .= $buffer ;
 		    }
 		    if (!feof($handle)) {
 		        echo "Error: unexpected fgets() fail\n";

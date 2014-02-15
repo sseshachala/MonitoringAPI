@@ -15,4 +15,13 @@
 	{
 		return json_encode( array( 'response' => 'error', 'message' => $err_string ) );
 	}
+	
+	function startsWith($haystack, $needle)
+	{
+	    return $needle === "" || strpos($haystack, $needle) === 0;
+	}
+	function endsWith($haystack, $needle)
+	{
+	    return $needle === "" || substr($haystack, -strlen($needle)) === $needle;
+	}
 ?>
