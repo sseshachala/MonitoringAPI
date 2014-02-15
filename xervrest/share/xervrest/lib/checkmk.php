@@ -146,7 +146,7 @@ class CheckMkCfg
 		{
 			foreach($params['logwatch'] as $logwatchLog)
 			{
-				$cfg_s .= sprintf("checks += [ ( '%s', 'logwatch', '%s', '') ] ", $params['host'], $logwatchLog);
+				$cfg_s .= sprintf("checks += [ ( '%s', 'logwatch', '%s', '') ] ", $params['hostname'], $logwatchLog);
 			}
 			
 		}
