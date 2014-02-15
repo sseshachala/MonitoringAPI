@@ -136,7 +136,7 @@ class CheckMkCfg
         {
             throw Exception("Could not open file for writing: " . $this->cfg_file);
         }
-		
+		$cfg_s = '';
 		$cfg_s .= sprintf("all_hosts += [ \"%s|xervrest|/\" + FOLDER_PATH + \"/\"]\n", $params['check']);
         
 		
