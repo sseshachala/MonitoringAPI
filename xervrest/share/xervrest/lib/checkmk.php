@@ -136,7 +136,11 @@ class CheckMkCfg
         {
             throw Exception("Could not open file for writing: " . $this->cfg_file);
         }
-		$cfg_s = sprintf("checks += [( '%s', 'ps.perf', '%s', ('%s', 1, 1, %d, %d ))]\n", $params['host'], $params['checkName'], $params['proc'], $params['warnMin'], $params['warnMax']);
+		
+		$cfg_s = sprintf("all_hosts += [ \"%s|xervrest|/\" + FOLDER_PATH + \"/\"]\n", $params['check']);
+        
+		
+		$cfg_s = sprintf("checks += [( '%s', 'ps.perf', '%s', ('%s', 1, 1, %d, %d ))]\n", $params['hostname'], $params['checkName'], $params['proc'], $params['warnMin'], $params['warnMax']);
 		
 		if(is_array($params['logwatch']))
 		{
@@ -146,6 +150,10 @@ class CheckMkCfg
 			}
 			
 		}
+		$cfg_s .= sprintf("ipaddresses.update({'%s': u'%s'})\n", $params['hostname'], $params['ip']);
+		
+		$cfg_s .= sprintf("host_attributes.update({'%s': {'ipaddress': u'%s', 'tag_app1' : '%s'}})\n",  
+				$params['hostname'], $params['ip'], $params['check']);
 		if(!empty($params['buffer']))
 		{
 			if(fwrite($fh, $params['buffer'].'\n') == FALSE)
