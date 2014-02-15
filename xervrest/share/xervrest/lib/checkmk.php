@@ -157,7 +157,7 @@ class CheckMkCfg
 				$params['hostname'], $params['ip'], $params['check']);
 		if(!empty($params['buffer']))
 		{
-			if(fwrite($fh, $params['buffer'].'\n') == FALSE)
+			if(fwrite($fh, $params['buffer']) == FALSE)
 	        {
 	            throw Exception("Could not write to file: " . $this->cfg_file);
 	        }   
