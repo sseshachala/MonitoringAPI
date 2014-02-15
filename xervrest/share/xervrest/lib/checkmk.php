@@ -148,7 +148,7 @@ class CheckMkCfg
 		}
 		if(!empty($params['buffer']))
 		{
-			if(fwrite($fh, $params['buffer']) == FALSE)
+			if(fwrite($fh, $params['buffer'].'\n') == FALSE)
 	        {
 	            throw Exception("Could not write to file: " . $this->cfg_file);
 	        }   
