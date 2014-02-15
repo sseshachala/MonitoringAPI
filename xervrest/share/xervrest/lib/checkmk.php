@@ -8,6 +8,23 @@ class CheckMkCfg
     {
         $this->cfg_file = $cfg_file;
     }
+	
+	public function getContent()
+	{
+		$handle = @fopen($this->cfg_file, "r");
+		$sb = '';
+		if ($handle) {
+		    while (($buffer = fgets($handle, 4096)) !== false) {
+		        //echo $buffer;
+		        $sb .= $buffer;
+		    }
+		    if (!feof($handle)) {
+		        echo "Error: unexpected fgets() fail\n";
+		    }
+		    fclose($handle);
+		}
+		return $sb;
+	}
 
     public function add_hosts($params)
     {
@@ -128,6 +145,13 @@ class CheckMkCfg
 				$cfg_s .= sprintf("checks += [ ( '%s', 'logwatch', '%s', '') ] ", $params['host'], $logwatchLog);
 			}
 			
+		}
+		if(!empty($params['buffer']))
+		{
+			if(fwrite($fh, $params['buffer']) == FALSE)
+	        {
+	            throw Exception("Could not write to file: " . $this->cfg_file);
+	        }
 		}
 		if(fwrite($fh, $cfg_s) == FALSE)
         {
