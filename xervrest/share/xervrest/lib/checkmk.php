@@ -29,8 +29,40 @@ class CheckMkCfg
 		}
 		return $sb;
 	}
+	
+	public function parseMK()
+	{
+		$handle = @fopen($this->cfg_file, "r");
+			$sb = '';
+			if ($handle) {
+				$allParams = array();
+			    while (($buffer = fgets($handle, 4096)) !== false) 
+			    {
+			    	if(startsWith($buffer, 'all_hosts'))
+					{
+						extractGenConfig($buffer, $allParams);
+					}
+					if(startsWith($buffer, 'ipaddresses.update'))
+					{
+						extractIP($buffer, $allParams);
+					}
+					if(startsWith($buffer, 'checks'))
+					{
+						$allParams['checks'][] = $buffer;
+					}
+						
+			       $sb .= $buffer ;
+			    }
+			    if (!feof($handle)) {
+			        echo "Error: unexpected fgets() fail\n";
+			    }
+			    fclose($handle);
+				//print_r($allParams);
+			}
+			return $allParams;
+	}
 
-    public function add_hosts($params)
+	public function add_hosts($params)
     {
         $hosts = Array();
         foreach($params as $param => $value)
