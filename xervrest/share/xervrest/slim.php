@@ -439,6 +439,20 @@
         $rest = new XervRest($live);
         print $rest->getHostConfig($params);
     });
+	
+	$app->get('/deleteHostConfig', function() use ($app) {
+        $app->contentType('application/json');
+        $params = $app->request->params();
+
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+
+        $rest = new XervRest($live);
+        print $rest->deleteHostConfig($params);
+    });
     //getConfiguredApache
 	$app->get('/:method', function ($method) use ($app) {
 
