@@ -425,7 +425,8 @@
         $rest = new XervRest($live);
         print $rest->configureApache($params);
     });
-	 $app->get('/getConfiguredApache', function() use ($app) {
+	
+	$app->get('/getHostConfig', function() use ($app) {
         $app->contentType('application/json');
         $params = $app->request->params();
 
@@ -436,7 +437,7 @@
         }
 
         $rest = new XervRest($live);
-        print $rest->getConfiguredApache($params);
+        print $rest->getHostConfig($params);
     });
     //getConfiguredApache
 	$app->get('/:method', function ($method) use ($app) {
