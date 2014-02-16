@@ -1139,7 +1139,7 @@ throw $e;
 			
 			try {
                 $cfg = new CheckMkCfg($cfg_file);
-                return json_encode($cfg->parseMK());
+                return json_encode(array('status' => 'OK' , 'message' =>$cfg->parseMK()));
             } catch(Exception $e) {
                 return error_json( $e->getMessage() );
             }
