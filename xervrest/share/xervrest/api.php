@@ -1123,7 +1123,7 @@ throw $e;
             return response_json('success', sprintf('The request has been executed. Inventory command output: %s Restart command output: %s', $inv_retval, $res_retval ));
         }
 
-		 public function getHostConfig($params)
+		public function getHostConfig($params)
         {
             $site = get_site();
             $missing_params = $this->_check_params($params, Array('host', 'ip'));
@@ -1143,6 +1143,39 @@ throw $e;
             } catch(Exception $e) {
                 return error_json( $e->getMessage() );
             }
+			
+        }
+		
+		public function deleteHostConfig($params)
+        {
+            $site = get_site();
+            $missing_params = $this->_check_params($params, Array('host', 'ip'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $host = $params['host'];
+			
+			$cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+			$cfg_file = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $params['ip']);
+			
+			 try 
+            {
+                if(unlink($cfg_file) == FALSE)
+                {
+                    return error_json("Could not remove file $cfg_file");
+                }
+
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $cmk->cmk_cmd($site, " -R");
+            } 
+            catch(Exception $exc)
+            {
+                return error_json( $exc->getMessage() );
+            }
+
+            return response_json('success', 'Host Config is deleted for IP: '. $params['ip'] . ' Host :' .$params['host']);
 			
         }
     }
