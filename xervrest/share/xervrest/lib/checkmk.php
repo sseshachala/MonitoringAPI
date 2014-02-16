@@ -33,9 +33,10 @@ class CheckMkCfg
 	public function parseMK()
 	{
 		$handle = @fopen($this->cfg_file, "r");
+		$allParams = array();
 			$sb = '';
 			if ($handle) {
-				$allParams = array();
+				
 			    while (($buffer = fgets($handle, 4096)) !== false) 
 			    {
 			    	if(startsWith($buffer, 'all_hosts'))
