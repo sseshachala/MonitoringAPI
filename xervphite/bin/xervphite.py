@@ -431,8 +431,8 @@ def process_merged_data(file_name, delete_after=0):
             if var_name == 'HOSTPERFDATA': host_perf_data = value
 
         if not re.search("=", service_perf_data) and not re.search("=", host_perf_data):
-            log.info("Found no performance data in %s" % file_name)
-            return False
+            log.info("Found no performance data in %s. Skipping line" % file_name)
+            continue
 
         carbon_string = build_carbon_metric( graphite_prefix, host_name, graphite_postfix)
 
