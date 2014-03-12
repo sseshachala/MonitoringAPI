@@ -1146,11 +1146,8 @@ throw $e;
 				$cfg = new CheckMkCfg($cfg_file);	
 				try 
 				{
-					$result = $cfg->deployBaseConfiguration($params['config']);
-					if(!$result)
-					{
-						return error_json('Failed to deploy the base configuration!');
-					}
+					$cfg->deployBaseConfiguration($params['config']);
+					
 	            } 
 	            catch(Exception $e) 
 	            {
