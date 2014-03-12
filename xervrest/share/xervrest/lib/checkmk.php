@@ -87,7 +87,7 @@ class CheckMkCfg
         return $host_list;
     }
 	
-	 /*public function add_host($params)
+	 public function add_host($params)
     {
         $fh = fopen($this->cfg_file, 'w');
 
@@ -105,9 +105,9 @@ class CheckMkCfg
         }
 
         fclose($fh);
-    }*/
+    }
 
-    public function add_host($params)
+   /* public function add_host($params)
     {
         $fh = fopen($this->cfg_file, 'w');
 
@@ -165,6 +165,8 @@ class CheckMkCfg
 
         fclose($fh);
     }
+    * 
+    */
 
 	public function deployBaseConfiguration($config)
 	{
