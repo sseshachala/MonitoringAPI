@@ -166,42 +166,19 @@ class CheckMkCfg
         fclose($fh);
     }
 
-	public function configureApache($params)
+	public function deployBaseConfiguration($config)
 	{
 		$fh = fopen($this->cfg_file, 'w');
-		 if(!$fh)
+		if(!$fh)
         {
             throw Exception("Could not open file for writing: " . $this->cfg_file);
         }
-		$cfg_s = '';
-		$cfg_s .= sprintf("checks += [( '%s', 'ps.perf', '%s', ('%s', 1, 1, %d, %d ))]\n", $params['hostname'], $params['checkName'], $params['proc'], $params['warnMin'], $params['warnMax']);
-		
-		if(is_array($params['logwatch']))
-		{
-			foreach($params['logwatch'] as $logwatchLog)
-			{
-				$cfg_s .= sprintf("checks += [ ( '%s', 'logwatch', '%s', '') ] \n", $params['hostname'], $logwatchLog);
-			}
-			
-		}
-		$cfg_s .= sprintf("ipaddresses.update({'%s': u'%s'})\n", $params['hostname'], $params['ip']);
-		
-		$cfg_s .= sprintf("host_attributes.update({'%s': {'ipaddress': u'%s', 'tag_app1' : '%s'}})\n",  
-				$params['hostname'], $params['ip'], $params['check']);
-		if(!empty($params['buffer']))
-		{
-			if(fwrite($fh, $params['buffer']) == FALSE)
-	        {
-	            throw Exception("Could not write to file: " . $this->cfg_file);
-	        }   
-		}
-		if(fwrite($fh, $cfg_s) == FALSE)
+		if(fwrite($fh, $config) == FALSE)
         {
             throw Exception("Could not write to file: " . $this->cfg_file);
         }
 
         fclose($fh);
-		
 	}
 
     public function add_ps_check($host, $cname, $proc, $user=false, $warnmin=1, $okmin=1, $okmax=1, $warnmax=1)

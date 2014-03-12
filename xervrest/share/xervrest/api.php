@@ -1066,63 +1066,6 @@ throw $e;
             return response_json('success', 'The request has been executed. Results: ' . $retval);
         }
 
-		 public function configureApache($params)
-        {
-        	if(empty($params['ip']) || empty($params['check']) || empty($params['checkName']) || empty($params['hostname']) )
-			{
-				return error_json('check, checkName and host are mandatory');
-			}
-		 	
-		 	$site = get_site();
-            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-			$genConfFile = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $params['ip']);
-			$cfg = '';
-			if(file_exists($genConfFile))
-			{
-				$cfg_file = $genConfFile;
-				$cfg = new CheckMkCfg($cfg_file);	
-				$params['buffer'] = $cfg -> getContent($params['check']);
-				
-			}
-			else 
-			{
-				$cfg_file = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $params['ip']);
-				$cfg = new CheckMkCfg($cfg_file);	
-				try 
-				{
-					$params['app1'] = $params['check'];
-					//defaut
-					$params['agent_type'] = 'cmk_agent'; 
-					$params['server'] = 'vm'; 
-					$params['system'] = 'linux';
-                	$all_hosts = $cfg->add_hosts($params);
-	            } 
-	            catch(Exception $e) 
-	            {
-	                return error_json( $e->getMessage() );
-	            }
-				
-			}
-           try {
-                $all_hosts = $cfg->configureApache($params);
-            } catch(Exception $e) {
-                return error_json( $e->getMessage() );
-            }
-
-            $inv_retval = '';
-            $res_retval = '';
-
-            try {
-                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
-                $inv_retval = $cmk->cmk_cmd($site, " -I $all_hosts 2>&1");
-                $res_retval = $cmk->cmk_cmd($site, " -R");
-            } catch(Exception $e) {
-                return error_json( $e->getMessage() );
-            }
-
-            return response_json('success', sprintf('The request has been executed. Inventory command output: %s Restart command output: %s', $inv_retval, $res_retval ));
-        }
-
 		public function getHostConfig($params)
         {
             $site = get_site();
@@ -1177,6 +1120,54 @@ throw $e;
 
             return response_json('success', 'Host Config is deleted for IP: '. $params['ip'] . ' Host :' .$params['host']);
 			
+        }
+
+		public function deployBaseConfig($params)
+        {
+        	if(empty($params['templateName']) || empty($params['config']) ) 
+			{
+				return error_json('Configration Name and Configuration should not be empty!');
+			}
+		 	
+		 	$site = get_site();
+            $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
+			$genConfFile = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $params['templateName']);
+			$cfg = '';
+			if(file_exists($genConfFile))
+			{
+				if(unlink($genConfFile) == FALSE)
+                {
+                    return error_json("Could not remove file $genConfFile");
+                }
+			}
+			else 
+			{
+				$cfg_file = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $params['templateName']);
+				$cfg = new CheckMkCfg($cfg_file);	
+				try 
+				{
+					$result = $cfg->deployBaseConfiguration($params['config']);
+					if(!$result)
+					{
+						return error_json('Failed to deploy the base configuration!');
+					}
+	            } 
+	            catch(Exception $e) 
+	            {
+	                return error_json( $e->getMessage() );
+	            }
+				
+			}
+          $inv_retval = ''; $res_retval = '';
+            try {
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $inv_retval = $cmk->cmk_cmd($site, " -I 2>&1");
+                $res_retval = $cmk->cmk_cmd($site, " -R");
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+
+            return response_json('success', sprintf('The request has been executed. Inventory command output: %s Restart command output: %s', $inv_retval, $res_retval ));
         }
     }
 ?>
