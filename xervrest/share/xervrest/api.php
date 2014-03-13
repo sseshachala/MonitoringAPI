@@ -1181,16 +1181,15 @@ throw $e;
 					$inv_retval = $cmk->cmk_cmd($site, " -I 2>&1");
 					if($inv_retval == sprintf("Error in configuration: duplicate host '%s'", $hostIPArray[1]) )
 					{
-						$resultMsg[] = array('data' => $hostIp, array('status' => 'error', 'message'=> $inv_retval));
+						$resultMsg[] = array('status' => 'error', 'message'=> $inv_retval);
 						continue;
 					}
                 	$res_retval = $cmk->cmk_cmd($site, " -R ");
-					$resultMsg[] = array('data' => $hostIp, array('status' => 'OK', "message" => $inv_retval. ':' . $res_retval));
+					$resultMsg[] = array('status' => 'OK', "message" => $inv_retval. ':' . $res_retval);
 			    } 
 		        catch(Exception $e) 
 		        {
-		           	$resultMsg[] = array('data' => $hostIp, array('status' => 'error',
-																	  'message' => $e));
+		           	$resultMsg[] =array('status' => 'error', 'message' => $e));
 		        }		
 			}
 			return json_encode($resultMsg);
