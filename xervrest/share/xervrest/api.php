@@ -1145,7 +1145,8 @@ throw $e;
 				{
 					if(unlink($genConfFile) == FALSE)
 	                {
-	                    return error_json("Could not remove file $genConfFile");
+	                   $resultMsg[] = array('data' => $hostIp, array('status' => 'error',
+																	  'message' => 'Could not deploy file ' . $genConfFile));
 	                }
 				}
 				else 
