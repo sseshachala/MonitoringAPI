@@ -1131,40 +1131,43 @@ throw $e;
 		 	
 		 	$site = get_site();
             $cfg_root = "/omd/sites/$site/etc/check_mk/conf.d";
-			$genConfFile = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $params['templateName']);
+			//$genConfFile = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $params['templateName']);
 			$cfg = '';
-			if(file_exists($genConfFile))
+			
+			$config = $params['config'];
+			$cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+			$resultMsg = array();
+			foreach($config as $hostIP => $config)
 			{
-				if(unlink($genConfFile) == FALSE)
-                {
-                    return error_json("Could not remove file $genConfFile");
-                }
-			}
-			else 
-			{
-				$cfg_file = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $params['templateName']);
-				$cfg = new CheckMkCfg($cfg_file);	
-				try 
+				$hostIPArray = explode(':', $hostIP);
+				$genConfFile = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $hostIPArray[1]);
+				if(file_exists($genConfFile))
 				{
-					$cfg->deployBaseConfiguration($params['config']);
-					
-	            } 
-	            catch(Exception $e) 
-	            {
-	                return error_json( $e->getMessage() );
-	            }
-				
+					if(unlink($genConfFile) == FALSE)
+	                {
+	                    return error_json("Could not remove file $genConfFile");
+	                }
+				}
+				else 
+				{
+					$cfg_file = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $hostIPArray[1]);
+					$cfg = new CheckMkCfg($cfg_file);	
+					try 
+					{
+						$cfg->deployConfiguration($params['config']);
+						$inv_retval = $cmk->cmk_cmd($site, " -I 2>&1");
+                		$res_retval = $cmk->cmk_cmd($site, " -R");
+						$resultMsg[] = array('data' => $hostIp, array('status' => 'OK',
+																	  'message' => $inv_retval . ':'. $res_retval));
+		            } 
+		            catch(Exception $e) 
+		            {
+		            	$resultMsg[] = array('data' => $hostIp, array('status' => 'error',
+																	  'message' => $e));
+		            }		
+				}
 			}
-          $inv_retval = ''; $res_retval = '';
-            try {
-                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
-                $inv_retval = $cmk->cmk_cmd($site, " -I 2>&1");
-                $res_retval = $cmk->cmk_cmd($site, " -R");
-            } catch(Exception $e) {
-                return error_json( $e->getMessage() );
-            }
-
-            return response_json('success', sprintf('The request has been executed. Inventory command output: %s Restart command output: %s', $inv_retval, $res_retval ));
-        }
+			return json_encode($resultMsg);
+       }
     }
 ?>

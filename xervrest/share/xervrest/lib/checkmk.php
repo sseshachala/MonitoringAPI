@@ -168,7 +168,7 @@ class CheckMkCfg
     * 
     */
 
-	public function deployBaseConfiguration($config)
+	public function deployConfiguration($config)
 	{
 		$fh = fopen($this->cfg_file, 'w');
 		if(!$fh)
