@@ -1142,8 +1142,27 @@ throw $e;
 			foreach($configArray as $config)
 			{
 				$hostIP = key($config);
+				if(empty($hostIP))
+				{
+					$returnMsg[] = array('data' => $config, array('status' => 'error', 
+															'message' => 'Select at lesst one Host to deploy configuration'));
+					continue;
+				}
 				$hostConfig = $config[$hostIP];
+				if(empty($hostConfig))
+				{
+					$returnMsg[] = array('data' => $config, array('status' => 'error', 
+															'message' => 'Select at lesst one Host to deploy configuration'));
+					continue;
+					
+				}
 				$hostIPArray = explode(':', $hostIP);
+				if(empty($hostIPArray))
+				{
+					$returnMsg[] = array('data' => $config, array('status' => 'error', 
+															'message' => 'Select at lesst one Host to deploy configuration'));
+					continue;
+				}
 				$genConfFile = sprintf("%s/xervrest_host_%s.mk", $cfg_root, $hostIPArray[1]);
 				if(file_exists($genConfFile))
 				{
