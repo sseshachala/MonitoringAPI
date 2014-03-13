@@ -1180,7 +1180,7 @@ throw $e;
 					$cfg->deployConfiguration($params['config']);
 					$inv_retval = $cmk->cmk_cmd($site, " -I 2>&1");
                 	$res_retval = $cmk->cmk_cmd($site, " -R");
-					$resultMsg[] = array('data' => $hostIp, array('status' => 'OK',
+					$resultMsg[] = array('data' => $hostIp, array('status' => 'OK',"Results : ".$inv_retval. ":" . $res_retval);
 			    } 
 		        catch(Exception $e) 
 		        {
@@ -1189,6 +1189,7 @@ throw $e;
 		        }		
 			}
 			return json_encode($resultMsg);
-       }
+		}
+       
     }
 ?>
