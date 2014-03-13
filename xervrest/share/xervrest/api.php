@@ -1124,7 +1124,7 @@ throw $e;
 
 		public function deployBaseConfig($params)
         {
-        	if(empty($params['templateName']) || empty($params['config']) ) 
+        	if( empty($params['config']) ) 
 			{
 				return error_json('Configration Name and Configuration should not be empty!');
 			}
