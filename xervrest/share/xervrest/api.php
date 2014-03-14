@@ -1189,7 +1189,7 @@ throw $e;
 			    } 
 		        catch(Exception $e) 
 		        {
-		           	$resultMsg[] =array('status' => 'error', 'message' => $e));
+		           	$resultMsg[] =array('status' => 'error', 'message' => $e);
 		        }		
 			}
 			return json_encode($resultMsg);
