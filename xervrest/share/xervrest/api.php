@@ -1181,8 +1181,8 @@ throw $e;
 					$inv_retval = $cmk->cmk_cmd($site, " -I 2>&1");
 					
                 	$res_retval = $cmk->cmk_cmd($site, " -R ");
-					$statusMessage .= 'Status for '.$hostIP . PHP_EOL. 'Auto Inventory Status' .$inv_retval 
-											.PHP_EOL. 'Configuration Status' .$res_retval;
+					$statusMessage .= 'Status for '.$hostIP . PHP_EOL. ' Auto Inventory Status ' .PHP_EOL.$inv_retval 
+											.PHP_EOL. ' Configuration Status ' .PHP_EOL.$res_retval;
 					$resultMsg[] = array('status' => 'OK', "message" => $statusMessage);
 			    } 
 		        catch(Exception $e) 
