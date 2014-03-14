@@ -1138,7 +1138,7 @@ throw $e;
 			
 			$cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
 			$resultMsg = array();
-			
+			$statusMessage = '';
 			foreach($configArray as $config)
 			{
 				$hostIP = key($config);
@@ -1179,13 +1179,11 @@ throw $e;
 				{
 					$cfg->deployConfiguration($hostConfig);
 					$inv_retval = $cmk->cmk_cmd($site, " -I 2>&1");
-					if($inv_retval == sprintf("Error in configuration: duplicate host '%s'", $hostIPArray[1]) )
-					{
-						$resultMsg[] = array('status' => 'error', 'message'=> $inv_retval);
-						continue;
-					}
+					
                 	$res_retval = $cmk->cmk_cmd($site, " -R ");
-					$resultMsg[] = array('status' => 'OK', "message" => $inv_retval. ':' . $res_retval);
+					$statusMessage .= 'Status for '.$hostIP . PHP_EOL. 'Auto Inventory Status' .$inv_retval 
+											.PHP_EOL. 'Configuration Status' .$res_retval;
+					$resultMsg[] = array('status' => 'OK', "message" => $statusMessage);
 			    } 
 		        catch(Exception $e) 
 		        {
