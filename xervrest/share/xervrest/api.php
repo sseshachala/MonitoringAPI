@@ -427,19 +427,10 @@
                 $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
                 $cmk->execute($host);
                 $ps = $cmk->section('check_'. $os .'_packages');
+				return json_encode($ps);
             } catch(Exception $e) {
                 return error_json( $e->getMessage() );
             }
-
-            if(array_key_exists('proc', $params))
-            {
-                $proc = $params['proc'];
-                $ps = preg_grep("/$proc/i", $ps);
-            }
-
-            $ps = $this->_format_ps($ps);
-
-            return str_replace('\/','/', json_encode($ps));
         }
 
         public function restart_site()
