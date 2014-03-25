@@ -410,6 +410,36 @@
 
             return str_replace('\/','/', json_encode($ps));
         }
+		
+		public function getPatchUpdates($params, $patch = 'linux')
+        {
+            $missing_params = $this->_check_params($params, Array('host'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $host = $params['host'];
+            $site = get_site();
+            
+            try {
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $cmk->execute($host);
+                $ps = $cmk->section('check_'. $patch. '_packages');
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+
+            if(array_key_exists('proc', $params))
+            {
+                $proc = $params['proc'];
+                $ps = preg_grep("/$proc/i", $ps);
+            }
+
+            $ps = $this->_format_ps($ps);
+
+            return str_replace('\/','/', json_encode($ps));
+        }
 
         public function restart_site()
         {
