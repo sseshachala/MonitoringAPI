@@ -411,21 +411,22 @@
             return str_replace('\/','/', json_encode($ps));
         }
 		
-		public function getPatchUpdates($params, $patch = 'linux')
+		public function getPatchUpdates($params)
         {
-            $missing_params = $this->_check_params($params, Array('host'));
+            $missing_params = $this->_check_params($params, Array('host', 'os'));
             if(count($missing_params) > 0)
             {
                 return error_json("Missing parameters: " . implode(' ', $missing_params));
             }
             
             $host = $params['host'];
+			$os = $params['os'];
             $site = get_site();
             
             try {
                 $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
                 $cmk->execute($host);
-                $ps = $cmk->section('check_'. $patch. '_packages');
+                $ps = $cmk->section('check_'. $os .'_packages');
             } catch(Exception $e) {
                 return error_json( $e->getMessage() );
             }

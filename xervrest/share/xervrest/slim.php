@@ -178,6 +178,20 @@
         $rest = new XervRest($live);
         print $rest->getprocess($params);
     });
+	
+	$app->get('/getPatchUpdates', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        print $rest->getPatchUpdates($params);
+    });
 
     $app->get('/add_check_template', function() use ($app) {
 		$app->contentType('application/json');
