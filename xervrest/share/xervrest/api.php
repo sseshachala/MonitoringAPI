@@ -432,6 +432,48 @@
                 return error_json( $e->getMessage() );
             }
         }
+		
+		public function portScanner($params)
+        {
+            $missing_params = $this->_check_params($params, Array('host'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $host = $params['host'];
+			$site = get_site();
+            
+            try {
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $cmk->execute($host);
+                $portDetails = $cmk->section('netstat');
+				return json_encode($portDetails);
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+        }
+        
+		public function uName($params)
+        {
+            $missing_params = $this->_check_params($params, Array('host'));
+            if(count($missing_params) > 0)
+            {
+                return error_json("Missing parameters: " . implode(' ', $missing_params));
+            }
+            
+            $host = $params['host'];
+			$site = get_site();
+            
+            try {
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+                $cmk->execute($host);
+                $uName = $cmk->section('uname');
+				return json_encode($uName);
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() );
+            }
+        }
 
         public function restart_site()
         {
@@ -643,7 +685,7 @@
                 $cfg = new CheckMkCfg($cfg_file);
                 $cfg->add_check($params['check'], $params['host'], $params['cname'], $params_str=$params['params_str']);
             } catch(Exception $e) {
-throw $e;
+				//throw $e;
                 return error_json( $e->getMessage() );
             }
 
