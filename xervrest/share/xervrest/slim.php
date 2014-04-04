@@ -192,6 +192,34 @@
         $rest = new XervRest($live);
         print $rest->getPatchUpdates($params);
     });
+	
+	$app->get('/portScanner', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        print $rest->portScanner($params);
+    });
+	
+	$app->get('/uName', function() use ($app) {
+		$app->contentType('application/json');
+        $params = $app->request->params();
+        
+        try {
+            $live = get_live_object();
+        } catch(Exception $e) {
+            exit(error_json($e->getMessage()));
+        }
+        
+        $rest = new XervRest($live);
+        print $rest->uName($params);
+    });
 
     $app->get('/add_check_template', function() use ($app) {
 		$app->contentType('application/json');
