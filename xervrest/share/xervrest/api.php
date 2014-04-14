@@ -488,6 +488,20 @@
             return response_json('success', sprintf('The request has been executed. Command output: %s', $res));
         }
         
+        public function discoverAndRestart()
+        {
+            $site = get_site();
+            try {
+                $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+				$ret = $cmk->auto_inventory($site);
+                $res = $cmk->restart($site);
+            } catch(Exception $e) {
+                return error_json( $e->getMessage() . " Output: $ret : $res");
+            }
+
+            return response_json('success', sprintf('The request has been executed. Command output: %s', $res));
+        }
+        
         private function _get_contact_group_members($contactgroup_name)
         {
             $site = get_site();
