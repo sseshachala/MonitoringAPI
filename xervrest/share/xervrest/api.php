@@ -480,6 +480,7 @@
             $site = get_site();
             try {
                 $cmk = new CheckMk(Array( 'defaults_path' => "/omd/sites/$site/etc/check_mk/defaults"));
+				$ret = $cmk->auto_inventory($site);
                 $res = $cmk->restart($site);
             } catch(Exception $e) {
                 return error_json( $e->getMessage() . " Output: $res");
