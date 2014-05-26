@@ -1,0 +1,5 @@
+Examples:
+
+curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d ' {"site": "testcmk"}' http://localhost:10090/xmdstatus
+
+curl -H "Accept: application/json" -H "Content-type: application/json" -X POST -d ' {"configpath": "/tmp/test", "configbody":"Hello World"}' http://localhost:10090/configcopy
